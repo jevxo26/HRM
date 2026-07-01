@@ -156,7 +156,7 @@ export default function DashboardPage() {
                             <div className="w-16 h-16 rounded-full overflow-hidden bg-slate-200 border-2 border-white shadow-sm relative">
                                 {profile?.profilePicture ? (
                                     <img 
-                                        src={profile.profilePicture.startsWith('http') ? profile.profilePicture : `http://localhost:3000${profile.profilePicture}`} 
+                                        src={profile.profilePicture.startsWith('http') ? profile.profilePicture : `http://localhost:8080${profile.profilePicture}`} 
                                         alt="Profile" 
                                         className="w-full h-full object-cover" 
                                     />
@@ -238,7 +238,7 @@ export default function DashboardPage() {
                                         <div key={project.id} className="p-4 rounded-2xl border border-slate-100 bg-slate-50 hover:border-indigo-200 transition-colors flex flex-col gap-3 relative overflow-hidden">
                                             {project.image && (
                                                 <div className="absolute top-0 right-0 w-16 h-16 opacity-10">
-                                                    <img src={project.image.startsWith('http') ? project.image : `http://localhost:3000${project.image}`} alt="" className="w-full h-full object-cover rounded-bl-full" />
+                                                    <img src={project.image.startsWith('http') ? project.image : `http://localhost:8080${project.image}`} alt="" className="w-full h-full object-cover rounded-bl-full" />
                                                 </div>
                                             )}
                                             <div>
@@ -411,7 +411,7 @@ export default function DashboardPage() {
                                                 <div key={b.id} className="flex items-center gap-3 p-3 rounded-xl border border-slate-100 hover:bg-slate-50 transition-colors">
                                                     <div className="w-10 h-10 rounded-full overflow-hidden bg-slate-200 shrink-0">
                                                         {b.profilePicture ? (
-                                                            <img src={b.profilePicture.startsWith('http') ? b.profilePicture : `http://localhost:3000${b.profilePicture}`} alt={b.name} className="w-full h-full object-cover" />
+                                                            <img src={b.profilePicture.startsWith('http') ? b.profilePicture : `http://localhost:8080${b.profilePicture}`} alt={b.name} className="w-full h-full object-cover" />
                                                         ) : (
                                                             <UserCircle className="w-full h-full text-slate-400 p-1" />
                                                         )}
@@ -437,7 +437,7 @@ export default function DashboardPage() {
                                                 <div key={nj.id} className="flex items-center gap-3 p-3 rounded-xl border border-slate-100 hover:bg-slate-50 transition-colors">
                                                     <div className="w-10 h-10 rounded-full overflow-hidden bg-slate-200 shrink-0">
                                                         {nj.profilePicture ? (
-                                                            <img src={nj.profilePicture.startsWith('http') ? nj.profilePicture : `http://localhost:3000${nj.profilePicture}`} alt={nj.name} className="w-full h-full object-cover" />
+                                                            <img src={nj.profilePicture.startsWith('http') ? nj.profilePicture : `http://localhost:8080${nj.profilePicture}`} alt={nj.name} className="w-full h-full object-cover" />
                                                         ) : (
                                                             <UserCircle className="w-full h-full text-slate-400 p-1" />
                                                         )}

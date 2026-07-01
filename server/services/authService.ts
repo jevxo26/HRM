@@ -122,7 +122,7 @@ export class AuthService {
       data: { resetPasswordToken, resetPasswordExpires },
     });
 
-    const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:3000';
+    const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:8080';
     const resetUrl = `${frontendUrl}/reset-password?token=${resetToken}`;
 
     await sendTemplateEmail(
