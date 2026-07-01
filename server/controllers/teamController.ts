@@ -50,7 +50,7 @@ export const assignUser = async (req: AuthRequest, res: Response): Promise<void>
 
 export const updateTeam = async (req: AuthRequest, res: Response): Promise<void> => {
   try {
-    const id = parseInt(req.params.id, 10);
+    const id = parseInt(req.params.id as string, 10);
     const { name, description } = req.body;
 
     if (req.user?.role !== 'admin') {
@@ -67,7 +67,7 @@ export const updateTeam = async (req: AuthRequest, res: Response): Promise<void>
 
 export const deleteTeam = async (req: AuthRequest, res: Response): Promise<void> => {
   try {
-    const id = parseInt(req.params.id, 10);
+    const id = parseInt(req.params.id as string, 10);
 
     if (req.user?.role !== 'admin') {
       res.status(403).json({ error: 'Forbidden. Admin access required.' });
