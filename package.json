@@ -4,7 +4,7 @@
   "private": true,
   "scripts": {
     "dev": "nodemon --watch server --watch tsconfig.server.json --ext ts --exec ts-node --project tsconfig.server.json server/index.ts",
-    "build": "next build && tsc --project tsconfig.server.json",
+    "build": "rm -rf .next && next build && tsc --project tsconfig.server.json",
     "start": "NODE_ENV=production node dist/index.js",
     "lint": "eslint"
   },
