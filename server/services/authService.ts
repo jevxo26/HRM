@@ -13,6 +13,8 @@ export class AuthService {
       where: { email: data.email },
     });
 
+    // xcvxcv
+
     if (existingUser) {
       throw new Error('User already exists with this email');
     }
@@ -171,7 +173,7 @@ export class AuthService {
 
     try {
       const decoded: any = jwt.verify(refreshToken, process.env.JWT_REFRESH_SECRET || 'refresh_secret');
-      
+
       const user = await prisma.user.findFirst({
         where: { id: decoded.userId, refreshToken },
       });
