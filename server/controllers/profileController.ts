@@ -50,6 +50,8 @@ export const updateProfile = async (req: AuthRequest, res: Response): Promise<vo
 
     // Admins can update any field, but employees shouldn't be able to update salary/employment info
     // For simplicity, we just pass the data, but in a real app, restrict fields based on role
+    // Admins can update any field, but employees shouldn't be able to update salary/employment info
+    // For simplicity, we just pass the data, but in a real app, restrict fields based on role
     if (req.user?.role !== 'admin') {
       // Remove restricted fields
       delete profileData.basicSalary;
@@ -59,6 +61,16 @@ export const updateProfile = async (req: AuthRequest, res: Response): Promise<vo
       delete profileData.employmentType;
       delete profileData.salaryGrade;
       delete profileData.designation; // added restriction for designation
+    }
+
+    // Convert date strings to Date objects for Prisma
+    const dateFields = ['dateOfBirth', 'joiningDate', 'confirmationDate'];
+    for (const field of dateFields) {
+      if (profileData[field]) {
+        profileData[field] = new Date(profileData[field]);
+      } else {
+        delete profileData[field]; // Prevent updating to empty string
+      }
     }
 
     const updatedProfile = await profileService.upsertProfile(userId, profileData);
