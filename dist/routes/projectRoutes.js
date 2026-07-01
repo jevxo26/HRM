@@ -1,0 +1,14 @@
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+const express_1 = require("express");
+const projectController_1 = require("../controllers/projectController");
+const authMiddleware_1 = require("../middlewares/authMiddleware");
+const uploadMiddleware_1 = require("../middlewares/uploadMiddleware");
+const router = (0, express_1.Router)();
+router.use(authMiddleware_1.verifyToken);
+router.post('/', authMiddleware_1.isAdmin, uploadMiddleware_1.upload.single('image'), projectController_1.createProject);
+router.get('/', projectController_1.getProjects);
+router.put('/:id', authMiddleware_1.isAdmin, uploadMiddleware_1.upload.single('image'), projectController_1.updateProject);
+router.delete('/:id', authMiddleware_1.isAdmin, projectController_1.deleteProject);
+router.post('/:id/comment', authMiddleware_1.isAdmin, projectController_1.addComment);
+exports.default = router;

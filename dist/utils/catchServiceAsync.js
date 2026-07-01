@@ -1,0 +1,16 @@
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.catchServiceAsync = void 0;
+const catchServiceAsync = (fn) => {
+    return (async (...args) => {
+        try {
+            return await fn(...args);
+        }
+        catch (error) {
+            // এখানে আপনি চাইলে সার্ভিসের এররগুলো লগ করে রাখতে পারেন বা কাস্টমাইজ করতে পারেন
+            console.error('Service Layer Error:', error);
+            throw error; // Controller-এর catchAsync যেন এটাকে ধরতে পারে তাই থ্রো করা হলো
+        }
+    });
+};
+exports.catchServiceAsync = catchServiceAsync;
