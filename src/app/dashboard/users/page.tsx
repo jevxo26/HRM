@@ -7,7 +7,6 @@ import { Button } from "@/components/ui/button";
 import { Plus, MoreHorizontal, Edit, Trash2, Users, Search, Eye } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
-import { UserFormModal } from "./UserFormModal";
 import { toast } from "sonner";
 
 interface User {
@@ -22,8 +21,6 @@ export default function UsersPage() {
   const [users, setUsers] = useState<User[]>([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
-  const [isModalOpen, setIsModalOpen] = useState(false);
-  const [editingUser, setEditingUser] = useState<User | null>(null);
 
   const fetchUsers = async () => {
     setLoading(true);
@@ -84,10 +81,7 @@ export default function UsersPage() {
         <h1 className="text-3xl font-bold tracking-tight">Users</h1>
         <Button
           className="bg-indigo-600 hover:bg-indigo-700 text-white"
-          onClick={() => {
-            setEditingUser(null);
-            setIsModalOpen(true);
-          }}
+          onClick={() => router.push('/dashboard/users/create')}
         >
           <Plus className="mr-2 h-4 w-4" /> Add User
         </Button>
@@ -184,10 +178,7 @@ export default function UsersPage() {
                             variant="ghost" 
                             size="icon"
                             className="h-9 w-9 text-slate-400 hover:text-indigo-600 hover:bg-indigo-50 dark:hover:bg-indigo-500/20 rounded-xl transition-all shadow-sm hover:shadow"
-                            onClick={() => {
-                              setEditingUser(user);
-                              setIsModalOpen(true);
-                            }}
+                            onClick={() => router.push(`/dashboard/users/edit/${user.id}`)}
                           >
                             <Edit className="h-4 w-4" />
                           </Button>
@@ -209,13 +200,6 @@ export default function UsersPage() {
           </div>
         </CardContent>
       </Card>
-
-      <UserFormModal
-        open={isModalOpen}
-        onOpenChange={setIsModalOpen}
-        user={editingUser}
-        onSuccess={fetchUsers}
-      />
     </div>
   );
 }
