@@ -3,6 +3,7 @@
 import React, { useState } from "react";
 import { Sidebar } from "@/components/dashboard/sidebar";
 import { Navbar } from "@/components/dashboard/navbar";
+import { Toaster } from "sonner";
 
 import { usePathname, useRouter } from "next/navigation";
 
@@ -61,6 +62,7 @@ export function MainLayout({
           </div>
         </main>
       </div>
+      <Toaster position="top-right" />
     </div>
   );
 }

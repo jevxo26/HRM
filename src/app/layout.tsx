@@ -3,7 +3,6 @@ import { Manjari } from "next/font/google";
 import "./globals.css";
 import { ReduxProvider } from "@/components/ReduxProvider";
 import { MainLayout } from "@/components/MainLayout";
-import { Toaster } from "sonner";
 
 const manjari = Manjari({
   weight: ["100", "400", "700"],
@@ -29,7 +28,6 @@ export default function RootLayout({
       <body className="min-h-full flex flex-col">
         <ReduxProvider>
           <MainLayout>{children}</MainLayout>
-          <Toaster position="top-right" />
         </ReduxProvider>
       </body>
     </html>
