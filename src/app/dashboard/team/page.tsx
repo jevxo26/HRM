@@ -13,6 +13,13 @@ interface Team {
   id: number;
   name: string;
   description: string;
+  users?: {
+    id: number;
+    name: string;
+    profile?: {
+      profilePicture?: string;
+    };
+  }[];
 }
 
 export default function TeamPage() {
@@ -116,6 +123,7 @@ export default function TeamPage() {
                 <TableRow className="hover:bg-transparent border-none">
                   <TableHead className="font-semibold text-slate-700 dark:text-slate-300 py-5 px-8 uppercase tracking-wider text-xs">Team Name</TableHead>
                   <TableHead className="font-semibold text-slate-700 dark:text-slate-300 py-5 px-6 uppercase tracking-wider text-xs">Description</TableHead>
+                  <TableHead className="font-semibold text-slate-700 dark:text-slate-300 py-5 px-6 uppercase tracking-wider text-xs">Members</TableHead>
                   <TableHead className="text-right font-semibold text-slate-700 dark:text-slate-300 py-5 px-8 uppercase tracking-wider text-xs">Actions</TableHead>
                 </TableRow>
               </TableHeader>
@@ -159,6 +167,32 @@ export default function TeamPage() {
                         </div>
                       </TableCell>
                       <TableCell className="px-6 py-5 text-slate-600 dark:text-slate-300">{team.description}</TableCell>
+                      <TableCell className="px-6 py-5">
+                        <div className="flex -space-x-2 overflow-hidden">
+                          {team.users && team.users.length > 0 ? (
+                            <>
+                              {team.users.slice(0, 4).map((user) => (
+                                <div key={user.id} className="inline-block h-8 w-8 rounded-full ring-2 ring-white dark:ring-slate-900 overflow-hidden bg-slate-200" title={user.name}>
+                                  {user.profile?.profilePicture ? (
+                                    <img src={user.profile.profilePicture.startsWith('/') ? user.profile.profilePicture : `/${user.profile.profilePicture}`} alt={user.name} className="h-full w-full object-cover" />
+                                  ) : (
+                                    <div className="flex h-full w-full items-center justify-center bg-indigo-100 text-indigo-700 text-xs font-bold">
+                                      {user.name.substring(0, 2).toUpperCase()}
+                                    </div>
+                                  )}
+                                </div>
+                              ))}
+                              {team.users.length > 4 && (
+                                <div className="flex h-8 w-8 items-center justify-center rounded-full ring-2 ring-white dark:ring-slate-900 bg-slate-100 text-xs font-medium text-slate-600">
+                                  +{team.users.length - 4}
+                                </div>
+                              )}
+                            </>
+                          ) : (
+                            <span className="text-sm text-slate-400">No members</span>
+                          )}
+                        </div>
+                      </TableCell>
                       <TableCell className="text-right px-8 py-5">
                         <div className="flex items-center justify-end gap-2 opacity-0 group-hover:opacity-100 transition-all duration-300 translate-x-2 group-hover:translate-x-0">
                           <Button 

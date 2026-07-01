@@ -47,3 +47,36 @@ export const assignUser = async (req: AuthRequest, res: Response): Promise<void>
     res.status(400).json({ error: error.message });
   }
 };
+
+export const updateTeam = async (req: AuthRequest, res: Response): Promise<void> => {
+  try {
+    const id = parseInt(req.params.id, 10);
+    const { name, description } = req.body;
+
+    if (req.user?.role !== 'admin') {
+      res.status(403).json({ error: 'Forbidden. Admin access required.' });
+      return;
+    }
+
+    const updatedTeam = await teamService.updateTeam(id, name, description);
+    res.status(200).json({ message: 'Team updated', team: updatedTeam });
+  } catch (error: any) {
+    res.status(400).json({ error: error.message });
+  }
+};
+
+export const deleteTeam = async (req: AuthRequest, res: Response): Promise<void> => {
+  try {
+    const id = parseInt(req.params.id, 10);
+
+    if (req.user?.role !== 'admin') {
+      res.status(403).json({ error: 'Forbidden. Admin access required.' });
+      return;
+    }
+
+    await teamService.deleteTeam(id);
+    res.status(200).json({ message: 'Team deleted' });
+  } catch (error: any) {
+    res.status(400).json({ error: error.message });
+  }
+};

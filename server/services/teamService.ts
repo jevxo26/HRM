@@ -13,8 +13,37 @@ export const createTeam = async (name: string, description?: string) => {
 
 export const getTeams = async () => {
   return await prisma.team.findMany({
-    include: { users: { select: { id: true, name: true, email: true } } },
+    include: { 
+      users: { 
+        select: { 
+          id: true, 
+          name: true, 
+          email: true,
+          role: true,
+          profile: true
+        } 
+      } 
+    },
     orderBy: { createdAt: 'desc' },
+  });
+};
+
+export const updateTeam = async (id: number, name: string, description?: string) => {
+  return await prisma.team.update({
+    where: { id },
+    data: { name, description },
+  });
+};
+
+export const deleteTeam = async (id: number) => {
+  // First unlink all users from this team
+  await prisma.user.updateMany({
+    where: { teamId: id },
+    data: { teamId: null },
+  });
+  
+  return await prisma.team.delete({
+    where: { id },
   });
 };
 
