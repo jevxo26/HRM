@@ -56,7 +56,7 @@ app.prepare().then(async () => {
   server.use('/api/schedule', scheduleRoutes);
   server.use('/api/projects', projectRoutes);
   server.use('/api/tasks', taskRoutes);
-  server.use('/api/teams', teamRoutes);
+  server.use('/api/team', teamRoutes);
   server.use('/api/leaves', leaveRoutes);
   server.use('/api/profile', profileRoutes);
 
