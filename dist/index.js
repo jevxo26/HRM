@@ -25,7 +25,7 @@ const prisma = new client_1.PrismaClient();
 const dev = process.env.NODE_ENV !== 'production';
 const app = (0, next_1.default)({ dev });
 const handle = app.getRequestHandler();
-const port = process.env.PORT || 3000;
+const port = process.env.PORT || 8080;
 app.prepare().then(async () => {
     const server = (0, express_1.default)();
     // Middleware

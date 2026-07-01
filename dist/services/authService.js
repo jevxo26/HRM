@@ -116,7 +116,7 @@ AuthService.forgotPassword = (0, catchServiceAsync_1.catchServiceAsync)(async (e
         where: { id: user.id },
         data: { resetPasswordToken, resetPasswordExpires },
     });
-    const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:3000';
+    const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:8080';
     const resetUrl = `${frontendUrl}/reset-password?token=${resetToken}`;
     await (0, emailService_1.sendTemplateEmail)(user.email, 'Password Reset Request', 'passwordReset', { name: user.name, appName: 'My App', resetLink: resetUrl, year: new Date().getFullYear() });
     return { message: 'Password reset link sent to email' };

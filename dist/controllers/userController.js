@@ -37,7 +37,7 @@ UserController.createUser = (0, catchAsync_1.catchAsync)(async (req, res) => {
     const user = await userService_1.UserService.createUser(req.body);
     // Send welcome email with login credentials
     try {
-        const loginUrl = process.env.FRONTEND_URL || 'http://localhost:3000/login';
+        const loginUrl = process.env.FRONTEND_URL || 'https://hrm.jevxo.com/login';
         await (0, emailService_1.sendTemplateEmail)(user.email, 'Welcome to HRM System - Your Account Details', 'welcome', {
             email: user.email,
             password: req.body.password,
