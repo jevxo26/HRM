@@ -23,9 +23,6 @@ model User {
   resetPasswordExpires DateTime?
   refreshToken         String?
 
-  teamId Int?
-  team   Team? @relation(fields: [teamId], references: [id])
-
   profile EmployeeProfile?
 
   createdAt DateTime @default(now())
@@ -41,7 +38,7 @@ model Team {
   id          Int      @id @default(autoincrement())
   name        String
   description String?
-  users       User[]
+  profiles    EmployeeProfile[]
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 }
@@ -97,6 +94,9 @@ model EmployeeProfile {
   id     Int  @id @default(autoincrement())
   userId Int  @unique
   user   User @relation(fields: [userId], references: [id])
+
+  teamId Int?
+  team   Team? @relation(fields: [teamId], references: [id])
 
   // 1. Personal Information
   profilePicture String?

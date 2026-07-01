@@ -31,8 +31,8 @@ export const getSchedules = async (req: AuthRequest, res: Response): Promise<voi
     let teamId = null;
 
     if (req.user?.role === 'employee' || req.user?.role === 'teamlead') {
-      const user = await prisma.user.findUnique({ where: { id: req.user.id } });
-      teamId = user?.teamId || null;
+      const user = await prisma.user.findUnique({ where: { id: req.user.id }, include: { profile: true } });
+      teamId = user?.profile?.teamId || null;
     }
 
     const schedules = await scheduleService.getSchedules(teamId);

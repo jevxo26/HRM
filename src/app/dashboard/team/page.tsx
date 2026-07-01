@@ -13,11 +13,12 @@ interface Team {
   id: number;
   name: string;
   description: string;
-  users?: {
+  profiles?: {
     id: number;
-    name: string;
-    profile?: {
-      profilePicture?: string;
+    profilePicture?: string;
+    user?: {
+      id: number;
+      name: string;
     };
   }[];
 }
@@ -169,22 +170,22 @@ export default function TeamPage() {
                       <TableCell className="px-6 py-5 text-slate-600 dark:text-slate-300">{team.description}</TableCell>
                       <TableCell className="px-6 py-5">
                         <div className="flex -space-x-2 overflow-hidden">
-                          {team.users && team.users.length > 0 ? (
+                          {team.profiles && team.profiles.length > 0 ? (
                             <>
-                              {team.users.slice(0, 4).map((user) => (
-                                <div key={user.id} className="inline-block h-8 w-8 rounded-full ring-2 ring-white dark:ring-slate-900 overflow-hidden bg-slate-200" title={user.name}>
-                                  {user.profile?.profilePicture ? (
-                                    <img src={user.profile.profilePicture.startsWith('/') ? user.profile.profilePicture : `/${user.profile.profilePicture}`} alt={user.name} className="h-full w-full object-cover" />
+                              {team.profiles.slice(0, 4).map((profile) => (
+                                <div key={profile.id} className="inline-block h-8 w-8 rounded-full ring-2 ring-white dark:ring-slate-900 overflow-hidden bg-slate-200" title={profile.user?.name || "User"}>
+                                  {profile.profilePicture ? (
+                                    <img src={profile.profilePicture.startsWith('/') ? profile.profilePicture : `/${profile.profilePicture}`} alt={profile.user?.name || "User"} className="h-full w-full object-cover" />
                                   ) : (
                                     <div className="flex h-full w-full items-center justify-center bg-indigo-100 text-indigo-700 text-xs font-bold">
-                                      {user.name.substring(0, 2).toUpperCase()}
+                                      {profile.user?.name ? profile.user.name.substring(0, 2).toUpperCase() : "US"}
                                     </div>
                                   )}
                                 </div>
                               ))}
-                              {team.users.length > 4 && (
+                              {team.profiles.length > 4 && (
                                 <div className="flex h-8 w-8 items-center justify-center rounded-full ring-2 ring-white dark:ring-slate-900 bg-slate-100 text-xs font-medium text-slate-600">
-                                  +{team.users.length - 4}
+                                  +{team.profiles.length - 4}
                                 </div>
                               )}
                             </>
