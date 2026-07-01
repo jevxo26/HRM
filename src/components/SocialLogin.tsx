@@ -2,7 +2,6 @@
 
 import React from 'react';
 import { GoogleOAuthProvider, GoogleLogin } from '@react-oauth/google';
-import FacebookLogin from 'react-facebook-login/dist/facebook-login-render-props';
 
 export default function SocialLogin() {
   const handleGoogleSuccess = async (credentialResponse: any) => {
@@ -25,28 +24,8 @@ export default function SocialLogin() {
     }
   };
 
-  const handleFacebookResponse = async (response: any) => {
-    if (response.accessToken) {
-      try {
-        const res = await fetch('/api/auth/social-login/facebook', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ accessToken: response.accessToken }),
-        });
-        const data = await res.json();
-        if (data.success) {
-          console.log('Facebook login success:', data);
-          // Handle successful login (e.g., store token, redirect)
-          // localStorage.setItem('token', data.data.token);
-        } else {
-          console.error('Facebook login failed:', data.error);
-        }
-      } catch (err) {
-        console.error('Error during Facebook login', err);
-      }
-    } else {
-      console.error('Facebook login failed: No access token');
-    }
+  const handleFacebookResponse = async () => {
+    console.log('Facebook login is currently disabled.');
   };
 
   const googleClientId = process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID || '';
@@ -82,23 +61,15 @@ export default function SocialLogin() {
       )}
 
       {facebookAppId ? (
-        <FacebookLogin
-          appId={facebookAppId}
-          autoLoad={false}
-          fields="name,email,picture"
-          callback={handleFacebookResponse}
-          render={(renderProps: any) => (
-            <button
-              onClick={renderProps.onClick}
-              className="w-full flex items-center justify-center gap-2 bg-[#1877F2] text-white p-2 rounded-md hover:bg-[#166FE5] transition-colors shadow-sm font-medium h-10"
-            >
-              <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" viewBox="0 0 24 24">
-                <path d="M9 8h-3v4h3v12h5v-12h3.642l.358-4h-4v-1.667c0-.955.192-1.333 1.115-1.333h2.885v-5h-3.808c-3.596 0-5.192 1.583-5.192 4.615v3.385z"/>
-              </svg>
-              Log in with Facebook
-            </button>
-          )}
-        />
+        <button
+          onClick={handleFacebookResponse}
+          className="w-full flex items-center justify-center gap-2 bg-[#1877F2] text-white p-2 rounded-md hover:bg-[#166FE5] transition-colors shadow-sm font-medium h-10"
+        >
+          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" viewBox="0 0 24 24">
+            <path d="M9 8h-3v4h3v12h5v-12h3.642l.358-4h-4v-1.667c0-.955.192-1.333 1.115-1.333h2.885v-5h-3.808c-3.596 0-5.192 1.583-5.192 4.615v3.385z"/>
+          </svg>
+          Log in with Facebook
+        </button>
       ) : (
         <div className="p-3 bg-red-50 text-red-600 text-sm rounded-md text-center">
           Configure NEXT_PUBLIC_FACEBOOK_APP_ID to enable Facebook Login
