@@ -1,26 +1,48 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 import { motion, AnimatePresence } from "framer-motion";
-import { UserCircle, Briefcase, Phone, CreditCard, ChevronRight, ChevronLeft, Save, Loader2, Mail, MapPin, Building, Activity } from "lucide-react";
+import { UserCircle, Briefcase, Phone, CreditCard, ChevronRight, ChevronLeft, Save, Loader2, Upload } from "lucide-react";
 import Select from "react-select";
 
 export function UserForm({ initialUser, initialProfile }: { initialUser?: any; initialProfile?: any }) {
   const router = useRouter();
   const [step, setStep] = useState(1);
   const [loading, setLoading] = useState(false);
+  const [uploading, setUploading] = useState(false);
   const [createdUserId, setCreatedUserId] = useState<number | null>(initialUser?.id || null);
+  const [teams, setTeams] = useState<{ id: number; name: string }[]>([]);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
+  useEffect(() => {
+    fetchTeams();
+  }, []);
+
+  const fetchTeams = async () => {
+    try {
+      const token = localStorage.getItem("token");
+      if (!token) return;
+      const res = await fetch("/api/teams", { headers: { Authorization: `Bearer ${token}` } });
+      if (res.ok) {
+        const data = await res.json();
+        setTeams(data.data || []);
+      }
+    } catch (error) {
+      console.error("Failed to fetch teams", error);
+    }
+  };
 
   // Step 1: Account Data
   const [accountData, setAccountData] = useState({
     name: initialUser?.name || "",
     email: initialUser?.email || "",
     role: initialUser?.role || "employee",
+    phone: initialUser?.phone || "",
     password: "",
   });
 
@@ -44,11 +66,45 @@ export function UserForm({ initialUser, initialProfile }: { initialUser?: any; i
 
   const handleProfileChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
-    const numberFields = ['basicSalary', 'allowances', 'grossSalary'];
+    const numberFields = ['basicSalary', 'allowances', 'grossSalary', 'teamId', 'reportingManager'];
     if (numberFields.includes(name)) {
       setProfileData((prev: any) => ({ ...prev, [name]: value ? parseFloat(value) : null }));
     } else {
       setProfileData((prev: any) => ({ ...prev, [name]: value }));
+    }
+  };
+
+  const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    const token = localStorage.getItem("token");
+    if (!token) return toast.error("Not authenticated");
+
+    const formData = new FormData();
+    formData.append("file", file);
+
+    setUploading(true);
+    try {
+      const res = await fetch("/api/upload/single", {
+        method: "POST",
+        headers: { Authorization: `Bearer ${token}` },
+        body: formData,
+      });
+      if (res.ok) {
+        const data = await res.json();
+        const fileUrl = data.url || data.filePath || (data.file && data.file.path) || (data.data && data.data.url);
+        if (fileUrl) {
+          setProfileData((prev: any) => ({ ...prev, profilePicture: fileUrl }));
+          toast.success("Picture uploaded successfully.");
+        }
+      } else {
+        toast.error("Failed to upload image");
+      }
+    } catch (error) {
+      toast.error("An error occurred during upload");
+    } finally {
+      setUploading(false);
     }
   };
 
@@ -157,6 +213,10 @@ export function UserForm({ initialUser, initialProfile }: { initialUser?: any; i
                   <Input type="email" name="email" value={accountData.email} onChange={handleAccountChange} required className={inputClass} />
                 </div>
                 <div className="space-y-2">
+                  <Label>Account Phone (Optional)</Label>
+                  <Input type="tel" name="phone" value={accountData.phone} onChange={handleAccountChange} className={inputClass} />
+                </div>
+                <div className="space-y-2">
                   <Label>System Role *</Label>
                   <Select
                     options={[
@@ -203,18 +263,40 @@ export function UserForm({ initialUser, initialProfile }: { initialUser?: any; i
               <div className="min-h-[300px] p-6 bg-slate-50/50 rounded-2xl border border-slate-100">
                 
                 {activeProfileTab === 'personal' && (
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div className="space-y-1.5"><Label>Gender</Label>
-                      <select name="gender" value={profileData?.gender || ""} onChange={handleProfileChange} className={`flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 ${inputClass}`}>
-                        <option value="">Select Gender</option><option value="Male">Male</option><option value="Female">Female</option><option value="Other">Other</option>
-                      </select>
+                  <div className="space-y-6">
+                    <div className="flex items-center gap-6">
+                      <div className="relative group cursor-pointer" onClick={() => fileInputRef.current?.click()}>
+                        <div className="w-24 h-24 rounded-full border-2 border-indigo-200 overflow-hidden bg-white flex items-center justify-center">
+                          {profileData?.profilePicture ? (
+                            <img src={profileData.profilePicture} alt="Profile" className="w-full h-full object-cover" />
+                          ) : (
+                            <UserCircle className="w-12 h-12 text-slate-300" />
+                          )}
+                        </div>
+                        <div className="absolute inset-0 bg-black/50 rounded-full flex flex-col items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+                          {uploading ? <Loader2 className="w-5 h-5 text-white animate-spin" /> : <Upload className="w-5 h-5 text-white" />}
+                        </div>
+                        <input type="file" ref={fileInputRef} className="hidden" accept="image/*" onChange={handleFileChange} />
+                      </div>
+                      <div>
+                        <Label className="text-sm font-semibold text-slate-700">Profile Picture</Label>
+                        <p className="text-xs text-slate-500">Click the avatar to upload a photo.</p>
+                      </div>
                     </div>
-                    <div className="space-y-1.5"><Label>Date of Birth</Label><Input type="date" name="dateOfBirth" value={profileData?.dateOfBirth || ""} onChange={handleProfileChange} className={inputClass} /></div>
-                    <div className="space-y-1.5"><Label>Blood Group</Label><Input name="bloodGroup" value={profileData?.bloodGroup || ""} onChange={handleProfileChange} className={inputClass} placeholder="e.g. O+" /></div>
-                    <div className="space-y-1.5"><Label>Marital Status</Label><Input name="maritalStatus" value={profileData?.maritalStatus || ""} onChange={handleProfileChange} className={inputClass} placeholder="e.g. Single" /></div>
-                    <div className="space-y-1.5"><Label>Nationality</Label><Input name="nationality" value={profileData?.nationality || ""} onChange={handleProfileChange} className={inputClass} placeholder="e.g. Bangladeshi" /></div>
-                    <div className="space-y-1.5"><Label>Religion</Label><Input name="religion" value={profileData?.religion || ""} onChange={handleProfileChange} className={inputClass} placeholder="e.g. Islam" /></div>
-                    <div className="space-y-1.5 col-span-full"><Label>NID / Passport</Label><Input name="nidOrPassport" value={profileData?.nidOrPassport || ""} onChange={handleProfileChange} className={inputClass} placeholder="ID Number" /></div>
+
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      <div className="space-y-1.5"><Label>Gender</Label>
+                        <select name="gender" value={profileData?.gender || ""} onChange={handleProfileChange} className={`flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 ${inputClass}`}>
+                          <option value="">Select Gender</option><option value="Male">Male</option><option value="Female">Female</option><option value="Other">Other</option>
+                        </select>
+                      </div>
+                      <div className="space-y-1.5"><Label>Date of Birth</Label><Input type="date" name="dateOfBirth" value={profileData?.dateOfBirth || ""} onChange={handleProfileChange} className={inputClass} /></div>
+                      <div className="space-y-1.5"><Label>Blood Group</Label><Input name="bloodGroup" value={profileData?.bloodGroup || ""} onChange={handleProfileChange} className={inputClass} placeholder="e.g. O+" /></div>
+                      <div className="space-y-1.5"><Label>Marital Status</Label><Input name="maritalStatus" value={profileData?.maritalStatus || ""} onChange={handleProfileChange} className={inputClass} placeholder="e.g. Single" /></div>
+                      <div className="space-y-1.5"><Label>Nationality</Label><Input name="nationality" value={profileData?.nationality || ""} onChange={handleProfileChange} className={inputClass} placeholder="e.g. Bangladeshi" /></div>
+                      <div className="space-y-1.5"><Label>Religion</Label><Input name="religion" value={profileData?.religion || ""} onChange={handleProfileChange} className={inputClass} placeholder="e.g. Islam" /></div>
+                      <div className="space-y-1.5 col-span-full"><Label>NID / Passport</Label><Input name="nidOrPassport" value={profileData?.nidOrPassport || ""} onChange={handleProfileChange} className={inputClass} placeholder="ID Number" /></div>
+                    </div>
                   </div>
                 )}
 
@@ -232,8 +314,19 @@ export function UserForm({ initialUser, initialProfile }: { initialUser?: any; i
                 {activeProfileTab === 'employment' && (
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div className="space-y-1.5"><Label>Employee Code</Label><Input name="employeeCode" value={profileData?.employeeCode || ""} onChange={handleProfileChange} className={inputClass} /></div>
+                    <div className="space-y-1.5"><Label>Team</Label>
+                      <select name="teamId" value={profileData?.teamId || ""} onChange={handleProfileChange} className={`flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 ${inputClass}`}>
+                        <option value="">No Team Assigned</option>
+                        {teams.map(t => (
+                          <option key={t.id} value={t.id}>{t.name}</option>
+                        ))}
+                      </select>
+                    </div>
                     <div className="space-y-1.5"><Label>Department</Label><Input name="department" value={profileData?.department || ""} onChange={handleProfileChange} className={inputClass} /></div>
                     <div className="space-y-1.5"><Label>Designation</Label><Input name="designation" value={profileData?.designation || ""} onChange={handleProfileChange} className={inputClass} /></div>
+                    <div className="space-y-1.5"><Label>Reporting Manager ID</Label><Input type="number" name="reportingManager" value={profileData?.reportingManager || ""} onChange={handleProfileChange} className={inputClass} placeholder="User ID of Manager" /></div>
+                    <div className="space-y-1.5"><Label>Branch / Office</Label><Input name="branchOrOffice" value={profileData?.branchOrOffice || ""} onChange={handleProfileChange} className={inputClass} placeholder="e.g. Headquarters" /></div>
+                    <div className="space-y-1.5"><Label>Work Location</Label><Input name="workLocation" value={profileData?.workLocation || ""} onChange={handleProfileChange} className={inputClass} placeholder="e.g. Remote, On-site" /></div>
                     <div className="space-y-1.5"><Label>Employment Type</Label>
                       <select name="employmentType" value={profileData?.employmentType || ""} onChange={handleProfileChange} className={`flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 ${inputClass}`}>
                         <option value="">Select Type</option><option value="FULLTIME">Full Time</option><option value="INTERN">Intern</option><option value="PROJECTBASE">Project Based</option>
@@ -241,6 +334,7 @@ export function UserForm({ initialUser, initialProfile }: { initialUser?: any; i
                     </div>
                     <div className="space-y-1.5"><Label>Joining Date</Label><Input type="date" name="joiningDate" value={profileData?.joiningDate || ""} onChange={handleProfileChange} className={inputClass} /></div>
                     <div className="space-y-1.5"><Label>Confirmation Date</Label><Input type="date" name="confirmationDate" value={profileData?.confirmationDate || ""} onChange={handleProfileChange} className={inputClass} /></div>
+                    <div className="space-y-1.5"><Label>Probation Status</Label><Input name="probationStatus" value={profileData?.probationStatus || ""} onChange={handleProfileChange} className={inputClass} placeholder="e.g. Under Probation" /></div>
                     <div className="space-y-1.5"><Label>Employment Status</Label>
                       <select name="employmentStatus" value={profileData?.employmentStatus || "Active"} onChange={handleProfileChange} className={`flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 ${inputClass}`}>
                         <option value="Active">Active</option><option value="On Leave">On Leave</option><option value="Resigned">Resigned</option><option value="Terminated">Terminated</option>
@@ -255,6 +349,7 @@ export function UserForm({ initialUser, initialProfile }: { initialUser?: any; i
                     <div className="space-y-1.5"><Label>Gross Salary</Label><Input type="number" name="grossSalary" value={profileData?.grossSalary || ""} onChange={handleProfileChange} className={inputClass} /></div>
                     <div className="space-y-1.5"><Label>Allowances</Label><Input type="number" name="allowances" value={profileData?.allowances || ""} onChange={handleProfileChange} className={inputClass} /></div>
                     <div className="space-y-1.5"><Label>Salary Grade</Label><Input name="salaryGrade" value={profileData?.salaryGrade || ""} onChange={handleProfileChange} className={inputClass} /></div>
+                    <div className="space-y-1.5 col-span-full"><Label>Tax Information (TIN)</Label><Input name="taxInformation" value={profileData?.taxInformation || ""} onChange={handleProfileChange} className={inputClass} placeholder="TIN Number" /></div>
                     <div className="space-y-1.5"><Label>Bank Name</Label><Input name="bankName" value={profileData?.bankName || ""} onChange={handleProfileChange} className={inputClass} /></div>
                     <div className="space-y-1.5"><Label>Account Number</Label><Input name="accountNumber" value={profileData?.accountNumber || ""} onChange={handleProfileChange} className={inputClass} /></div>
                     <div className="space-y-1.5"><Label>Routing Number</Label><Input name="routingNumber" value={profileData?.routingNumber || ""} onChange={handleProfileChange} className={inputClass} /></div>
