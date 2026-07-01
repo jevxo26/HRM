@@ -8,20 +8,174 @@ datasource db {
 }
 
 model User {
-  id        Int      @id @default(autoincrement())
-  name      String
-  email     String   @unique
-  phone     String?
-  password  String?
-  provider  String   @default("local")
-  providerId String? @unique
-  role      String   @default("employee")
-  issueDate DateTime @default(now())
-  loginLog  Json?    // Can store array of login timestamps or IP addresses
-  
+  id         Int      @id @default(autoincrement())
+  name       String
+  email      String   @unique
+  phone      String?
+  password   String?
+  provider   String   @default("local")
+  providerId String?  @unique
+  role       String   @default("employee")
+  issueDate  DateTime @default(now())
+  loginLog   Json? // Can store array of login timestamps or IP addresses
+
   resetPasswordToken   String?
   resetPasswordExpires DateTime?
   refreshToken         String?
+
+  teamId Int?
+  team   Team? @relation(fields: [teamId], references: [id])
+
+  profile EmployeeProfile?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  attendances   Attendance[]
+  schedules     Schedule[]
+  tasks         Task[]
+  leaveRequests LeaveRequest[]
+}
+
+model Team {
+  id          Int      @id @default(autoincrement())
+  name        String
+  description String?
+  users       User[]
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+model Attendance {
+  id        Int       @id @default(autoincrement())
+  userId    Int
+  user      User      @relation(fields: [userId], references: [id])
+  date      DateTime
+  status    String    @default("present") // present, absent, leave
+  checkIn   DateTime?
+  checkOut  DateTime?
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+}
+
+model Schedule {
+  id        Int      @id @default(autoincrement())
+  userId    Int
+  user      User     @relation(fields: [userId], references: [id])
+  dayOfWeek String
+  startTime String
+  endTime   String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Project {
+  id          Int      @id @default(autoincrement())
+  name        String
+  description String?
+  image       String?
+  progress    Int      @default(0)
+  tasks       Task[]
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+model Task {
+  id          Int      @id @default(autoincrement())
+  projectId   Int
+  project     Project  @relation(fields: [projectId], references: [id])
+  userId      Int?
+  assignedTo  User?    @relation(fields: [userId], references: [id])
+  title       String
+  description String?
+  status      String   @default("pending") // pending, in_progress, completed
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+model EmployeeProfile {
+  id     Int  @id @default(autoincrement())
+  userId Int  @unique
+  user   User @relation(fields: [userId], references: [id])
+
+  // 1. Personal Information
+  profilePicture String?
+  gender         String?
+  dateOfBirth    DateTime?
+  bloodGroup     String?
+  maritalStatus  String?
+  nationality    String?
+  religion       String?
+  nidOrPassport  String?
+
+  // 2. Contact Information
+  personalEmail    String?
+  officialEmail    String?
+  mobileNumber     String?
+  emergencyContact String?
+  presentAddress   String?
+  permanentAddress String?
+
+  // 3. Employment Information
+  employeeCode     String?   @unique
+  department       String?
+  designation      String?
+  branchOrOffice   String?
+  employmentType   String?
+  joiningDate      DateTime?
+  confirmationDate DateTime?
+  probationStatus  String?
+  reportingManager Int? // Could be linked to another User if needed
+  workLocation     String?
+  employmentStatus String?   @default("Active") // Active, Resigned, On Leave, Terminated
+
+  // 4. Salary & Payroll
+  basicSalary    Float?
+  allowances     Float?
+  grossSalary    Float?
+  taxInformation String?
+  bankName       String?
+  accountNumber  String?
+  routingNumber  String?
+  mobileBanking  String?
+  salaryGrade    String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model LeaveType {
+  id          Int     @id @default(autoincrement())
+  name        String
+  description String?
+  defaultDays Int? // e.g., 14 days of casual leave per year
+
+  leaveRequests LeaveRequest[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+enum EmploymentType {
+  INTERN
+  FULLTIME
+  PROJECTBASE
+}
+
+model LeaveRequest {
+  id     Int  @id @default(autoincrement())
+  userId Int
+  user   User @relation(fields: [userId], references: [id])
+
+  leaveTypeId Int
+  leaveType   LeaveType @relation(fields: [leaveTypeId], references: [id])
+
+  startDate DateTime
+  endDate   DateTime
+
+  dayType String  @default("full_day") // full_day, half_day
+  reason  String?
+  status  String  @default("pending") // pending, approved, rejected
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt

@@ -10,7 +10,6 @@ import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import SocialLogin from "../SocialLogin";
 
 const schema = yup.object().shape({
   name: yup.string().required("Name is required").min(2, "Name must be at least 2 characters"),
@@ -124,21 +123,6 @@ export function SignUpForm() {
       <Button type="submit" className="w-full" disabled={isLoading}>
         {isLoading ? "Creating account..." : "Sign Up"}
       </Button>
-
-      <div className="relative my-4">
-        <div className="absolute inset-0 flex items-center">
-          <span className="w-full border-t border-slate-200" />
-        </div>
-        <div className="relative flex justify-center text-xs uppercase">
-          <span className="bg-white/80 px-2 text-slate-500 rounded-full">
-            Or continue with
-          </span>
-        </div>
-      </div>
-
-      <div className="flex justify-center w-full pb-2">
-        <SocialLogin />
-      </div>
 
       <div className="text-center text-sm text-slate-500 mt-4">
         Already have an account?{" "}

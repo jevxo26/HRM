@@ -4,16 +4,43 @@ import React, { useState } from "react";
 import { Sidebar } from "@/components/dashboard/sidebar";
 import { Navbar } from "@/components/dashboard/navbar";
 
-export default function DashboardLayout({
+import { usePathname, useRouter } from "next/navigation";
+
+export function MainLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
+  const pathname = usePathname();
+  const router = useRouter();
+
+  React.useEffect(() => {
+    const isAuthPage = pathname === "/login";
+    const token = localStorage.getItem("token");
+    
+    if (!token && !isAuthPage) {
+      router.push("/login");
+    } else if (token && isAuthPage) {
+      router.push("/dashboard");
+    }
+  }, [pathname, router]);
 
   const toggleSidebar = () => {
     setIsSidebarCollapsed(!isSidebarCollapsed);
   };
+
+  const isAuthPage = pathname === "/login";
+
+  if (isAuthPage) {
+    return (
+      <div className="flex h-screen w-full bg-slate-50/50 overflow-hidden font-sans">
+        <main className="flex-1 overflow-y-auto">
+          {children}
+        </main>
+      </div>
+    );
+  }
 
   return (
     <div className="flex h-screen w-full bg-slate-50/50 overflow-hidden font-sans">

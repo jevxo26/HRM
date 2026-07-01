@@ -67,7 +67,7 @@ export class AuthService {
     }
 
     const token = jwt.sign(
-      { userId: user.id, email: user.email },
+      { userId: user.id, email: user.email, role: user.role },
       process.env.JWT_SECRET || 'fallback_secret',
       { expiresIn: (process.env.JWT_EXPIRES_IN || '30d') as any }
     );
@@ -181,7 +181,7 @@ export class AuthService {
       }
 
       const newAccessToken = jwt.sign(
-        { userId: user.id, email: user.email },
+        { userId: user.id, email: user.email, role: user.role },
         process.env.JWT_SECRET || 'fallback_secret',
         { expiresIn: (process.env.JWT_EXPIRES_IN || '30d') as any }
       );

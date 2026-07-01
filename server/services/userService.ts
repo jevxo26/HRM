@@ -23,4 +23,41 @@ export class UserService {
   static deleteUser = catchServiceAsync(async (id: number) => {
     return prisma.user.delete({ where: { id } });
   });
+
+  static getCelebrations = catchServiceAsync(async () => {
+    const today = new Date();
+    const profiles = await prisma.employeeProfile.findMany({
+      include: { user: true }
+    });
+    
+    const birthdays = profiles.filter(p => {
+      if (!p.dateOfBirth) return false;
+      const dob = new Date(p.dateOfBirth);
+      return dob.getMonth() === today.getMonth();
+    }).map(p => ({
+      id: p.userId,
+      name: p.user.name,
+      email: p.user.email,
+      profilePicture: p.profilePicture,
+      dateOfBirth: p.dateOfBirth,
+      designation: p.designation
+    }));
+    
+    const newJoiners = profiles.filter(p => {
+      if (!p.joiningDate) return false;
+      const joining = new Date(p.joiningDate);
+      const diffTime = today.getTime() - joining.getTime();
+      const diffDays = diffTime / (1000 * 60 * 60 * 24); 
+      return diffDays >= 0 && diffDays <= 30;
+    }).map(p => ({
+      id: p.userId,
+      name: p.user.name,
+      email: p.user.email,
+      profilePicture: p.profilePicture,
+      joiningDate: p.joiningDate,
+      designation: p.designation
+    }));
+    
+    return { birthdays, newJoiners };
+  });
 }

@@ -28,3 +28,21 @@ export const verifyToken = (req: AuthRequest, res: Response, next: NextFunction)
     res.status(403).json({ error: 'Invalid token.' });
   }
 };
+
+export const isAdmin = (req: AuthRequest, res: Response, next: NextFunction): void => {
+  if (req.user && req.user.role === 'admin') {
+    next();
+  } else {
+    res.status(403).json({ error: 'Access denied. Requires admin role.' });
+  }
+};
+
+export const authorizeRoles = (...allowedRoles: string[]) => {
+  return (req: AuthRequest, res: Response, next: NextFunction): void => {
+    if (req.user && allowedRoles.includes(req.user.role)) {
+      next();
+    } else {
+      res.status(403).json({ error: `Access denied. Requires one of: ${allowedRoles.join(', ')}` });
+    }
+  };
+};
