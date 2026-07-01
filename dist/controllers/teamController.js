@@ -33,7 +33,7 @@ var __importStar = (this && this.__importStar) || (function () {
     };
 })();
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.assignUser = exports.getTeams = exports.createTeam = void 0;
+exports.deleteTeam = exports.updateTeam = exports.assignUser = exports.getTeams = exports.createTeam = void 0;
 const teamService = __importStar(require("../services/teamService"));
 const createTeam = async (req, res) => {
     var _a;
@@ -81,3 +81,36 @@ const assignUser = async (req, res) => {
     }
 };
 exports.assignUser = assignUser;
+const updateTeam = async (req, res) => {
+    var _a;
+    try {
+        const id = parseInt(req.params.id, 10);
+        const { name, description } = req.body;
+        if (((_a = req.user) === null || _a === void 0 ? void 0 : _a.role) !== 'admin') {
+            res.status(403).json({ error: 'Forbidden. Admin access required.' });
+            return;
+        }
+        const updatedTeam = await teamService.updateTeam(id, name, description);
+        res.status(200).json({ message: 'Team updated', team: updatedTeam });
+    }
+    catch (error) {
+        res.status(400).json({ error: error.message });
+    }
+};
+exports.updateTeam = updateTeam;
+const deleteTeam = async (req, res) => {
+    var _a;
+    try {
+        const id = parseInt(req.params.id, 10);
+        if (((_a = req.user) === null || _a === void 0 ? void 0 : _a.role) !== 'admin') {
+            res.status(403).json({ error: 'Forbidden. Admin access required.' });
+            return;
+        }
+        await teamService.deleteTeam(id);
+        res.status(200).json({ message: 'Team deleted' });
+    }
+    catch (error) {
+        res.status(400).json({ error: error.message });
+    }
+};
+exports.deleteTeam = deleteTeam;

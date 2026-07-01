@@ -27,25 +27,49 @@ interface ScheduleFormModalProps {
   onOpenChange: (open: boolean) => void;
   schedule?: Schedule | null;
   onSuccess: () => void;
+  userRole?: string;
 }
 
-export function ScheduleFormModal({ open, onOpenChange, schedule, onSuccess }: ScheduleFormModalProps) {
+export function ScheduleFormModal({ open, onOpenChange, schedule, onSuccess, userRole }: ScheduleFormModalProps) {
   const [loading, setLoading] = useState(false);
+  const [users, setUsers] = useState<User[]>([]);
   const [formData, setFormData] = useState({
+    userId: "",
     dayOfWeek: "Monday",
     startTime: "",
     endTime: "",
   });
 
   useEffect(() => {
+    if (open && userRole !== 'employee') {
+      const fetchUsers = async () => {
+        const token = localStorage.getItem("token");
+        if (!token) return;
+        try {
+          const res = await fetch("/api/users", { headers: { Authorization: `Bearer ${token}` } });
+          if (res.ok) {
+            const result = await res.json();
+            setUsers(Array.isArray(result) ? result : result.data || []);
+          }
+        } catch (error) {
+          console.error("Failed to fetch users", error);
+        }
+      };
+      fetchUsers();
+    }
+  }, [open, userRole]);
+
+  useEffect(() => {
     if (schedule) {
       setFormData({
+        userId: schedule.userId?.toString() || "",
         dayOfWeek: schedule.dayOfWeek || "Monday",
         startTime: schedule.startTime || "",
         endTime: schedule.endTime || "",
       });
     } else {
       setFormData({
+        userId: "",
         dayOfWeek: "Monday",
         startTime: "",
         endTime: "",
@@ -65,11 +89,15 @@ export function ScheduleFormModal({ open, onOpenChange, schedule, onSuccess }: S
       const url = isEdit ? `/api/schedules/${schedule.id}` : "/api/schedules";
       const method = isEdit ? "PUT" : "POST";
 
-      const payload = {
+      const payload: any = {
         dayOfWeek: formData.dayOfWeek,
         startTime: formData.startTime,
         endTime: formData.endTime,
       };
+
+      if (userRole !== 'employee' && formData.userId) {
+        payload.userId = parseInt(formData.userId, 10);
+      }
 
       const res = await fetch(url, {
         method,
@@ -108,6 +136,18 @@ export function ScheduleFormModal({ open, onOpenChange, schedule, onSuccess }: S
             </DialogDescription>
           </DialogHeader>
           <div className="grid gap-4 py-4">
+            {userRole !== 'employee' && (
+              <div className="space-y-2">
+                <Label htmlFor="userId">User</Label>
+                <Select
+                  options={users.map(u => ({ value: u.id.toString(), label: u.name }))}
+                  value={formData.userId ? { value: formData.userId, label: users.find(u => u.id.toString() === formData.userId)?.name } : null}
+                  onChange={(option) => setFormData({ ...formData, userId: option?.value || "" })}
+                  placeholder="Select a user"
+                  className="text-sm"
+                />
+              </div>
+            )}
             <div className="space-y-2">
               <Label htmlFor="dayOfWeek">Day of Week</Label>
               <Select

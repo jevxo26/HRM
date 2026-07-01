@@ -278,6 +278,7 @@ export default function AttendancePage() {
         onOpenChange={setIsModalOpen}
         record={editingRecord}
         onSuccess={fetchAttendance}
+        userRole={userRole}
       />
     </div>
   );

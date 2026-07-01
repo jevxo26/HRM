@@ -21,7 +21,12 @@ export const verifyToken = (req: AuthRequest, res: Response, next: NextFunction)
 
   try {
     const secret = process.env.JWT_SECRET || 'fallback_secret';
-    const decoded = jwt.verify(token, secret);
+    const decoded: any = jwt.verify(token, secret);
+    
+    // Normalize user ID to support both old and new token formats
+    if (decoded.id && !decoded.userId) decoded.userId = decoded.id;
+    if (decoded.userId && !decoded.id) decoded.id = decoded.userId;
+    
     req.user = decoded;
     next();
   } catch (error) {
@@ -45,4 +50,12 @@ export const authorizeRoles = (...allowedRoles: string[]) => {
       res.status(403).json({ error: `Access denied. Requires one of: ${allowedRoles.join(', ')}` });
     }
   };
+};
+
+export const isNotEmployee = (req: AuthRequest, res: Response, next: NextFunction): void => {
+  if (req.user && req.user.role !== 'employee') {
+    next();
+  } else {
+    res.status(403).json({ error: 'Access denied. Employees cannot perform this action.' });
+  }
 };

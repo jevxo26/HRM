@@ -27,7 +27,7 @@ export function UserForm({ initialUser, initialProfile }: { initialUser?: any; i
     try {
       const token = localStorage.getItem("token");
       if (!token) return;
-      const res = await fetch("/api/teams", { headers: { Authorization: `Bearer ${token}` } });
+      const res = await fetch("/api/team", { headers: { Authorization: `Bearer ${token}` } });
       if (res.ok) {
         const data = await res.json();
         setTeams(data.data || []);

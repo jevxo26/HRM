@@ -31,6 +31,7 @@ AuthService.registerUser = (0, catchServiceAsync_1.catchServiceAsync)(async (dat
     const existingUser = await prisma.user.findUnique({
         where: { email: data.email },
     });
+    // xcvxcv
     if (existingUser) {
         throw new Error('User already exists with this email');
     }

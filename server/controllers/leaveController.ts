@@ -28,7 +28,7 @@ export class LeaveController {
 
   async applyLeave(req: Request, res: Response): Promise<void> {
     try {
-      const userId = (req as any).user.id;
+      const userId = (req as any).user.userId;
       const { leaveTypeId, startDate, endDate, dayType, reason } = req.body;
 
       if (!leaveTypeId || !startDate || !endDate) {
@@ -44,6 +44,38 @@ export class LeaveController {
         reason
       });
 
+      try {
+        const { PrismaClient } = require('@prisma/client');
+        const prisma = new PrismaClient();
+        const leaveWithUserAndType = await prisma.leaveRequest.findUnique({
+          where: { id: leave.id },
+          include: { user: true, leaveType: true }
+        });
+
+        if (leaveWithUserAndType) {
+          const { sendTemplateEmail } = require('../services/emailService');
+          const hrEmails = ['cto@jevxo.com', 'info@jevxo.com', 'arkohr@jevxo.com'];
+
+          for (const email of hrEmails) {
+            await sendTemplateEmail(
+              email,
+              `New Leave Request from ${leaveWithUserAndType.user.name}`,
+              'leave-request-admin',
+              {
+                employeeName: leaveWithUserAndType.user.name,
+                leaveType: leaveWithUserAndType.leaveType.name,
+                startDate: new Date(leaveWithUserAndType.startDate).toLocaleDateString(),
+                endDate: new Date(leaveWithUserAndType.endDate).toLocaleDateString(),
+                reason: reason || 'Not provided',
+                year: new Date().getFullYear()
+              }
+            ).catch(console.error);
+          }
+        }
+      } catch (emailErr) {
+        console.error('Error sending leave request email:', emailErr);
+      }
+
       res.status(201).json({ success: true, message: 'Leave request submitted successfully', data: leave });
     } catch (error: any) {
       res.status(500).json({ success: false, message: error.message });
@@ -52,7 +84,7 @@ export class LeaveController {
 
   async getMyLeaves(req: Request, res: Response): Promise<void> {
     try {
-      const userId = (req as any).user.id;
+      const userId = (req as any).user.userId;
       const leaves = await leaveService.getMyLeaves(userId);
       res.status(200).json({ success: true, data: leaves });
     } catch (error: any) {
@@ -80,7 +112,7 @@ export class LeaveController {
       }
 
       const updatedLeave = await leaveService.updateLeaveStatus(Number(id), status);
-      
+
       try {
         const { PrismaClient } = require('@prisma/client');
         const prisma = new PrismaClient();
@@ -88,13 +120,13 @@ export class LeaveController {
           where: { id: Number(id) },
           include: { user: true, leaveType: true }
         });
-        
+
         if (leaveWithUser && leaveWithUser.user.email) {
           const { sendTemplateEmail } = require('../services/emailService');
           await sendTemplateEmail(
-            leaveWithUser.user.email, 
-            `Leave Request ${status.toUpperCase()}`, 
-            'leave-status', 
+            leaveWithUser.user.email,
+            `Leave Request ${status.toUpperCase()}`,
+            'leave-status',
             {
               status: status,
               statusClass: status,

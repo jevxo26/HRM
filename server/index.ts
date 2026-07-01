@@ -18,11 +18,11 @@ import leaveRoutes from './routes/leaveRoutes';
 import profileRoutes from './routes/profileRoutes';
 const prisma = new PrismaClient();
 
-const dev = process.env.NODE_ENV !== 'production';
-const app = next({ dev });
-const handle = app.getRequestHandler();
+const port = parseInt(process.env.PORT || '8080', 10);
 
-const port = process.env.PORT || 8080;
+const dev = process.env.NODE_ENV !== 'production';
+const app = next({ dev, port });
+const handle = app.getRequestHandler();
 
 app.prepare().then(async () => {
   const server = express();
@@ -53,7 +53,7 @@ app.prepare().then(async () => {
   server.use('/api/auth', authRoutes);
   server.use('/api/upload', uploadRoutes);
   server.use('/api/attendance', attendanceRoutes);
-  server.use('/api/schedule', scheduleRoutes);
+  server.use('/api/schedules', scheduleRoutes);
   server.use('/api/projects', projectRoutes);
   server.use('/api/tasks', taskRoutes);
   server.use('/api/team', teamRoutes);

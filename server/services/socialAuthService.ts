@@ -92,7 +92,7 @@ export class SocialAuthService {
     const expiresIn = process.env.JWT_EXPIRES_IN || '1d';
 
     const token = jwt.sign(
-      { id: user.id, email: user.email, role: user.role },
+      { userId: user.id, email: user.email, role: user.role },
       secret,
       { expiresIn: expiresIn as any }
     );

@@ -13,11 +13,21 @@ export class UserService {
   });
 
   static createUser = catchServiceAsync(async (data: Prisma.UserCreateInput) => {
-    return prisma.user.create({ data });
+    const dataToSave = { ...data };
+    if (data.password) {
+      const bcrypt = require('bcrypt');
+      dataToSave.password = await bcrypt.hash(data.password, 10);
+    }
+    return prisma.user.create({ data: dataToSave });
   });
 
   static updateUser = catchServiceAsync(async (id: number, data: Prisma.UserUpdateInput) => {
-    return prisma.user.update({ where: { id }, data });
+    const dataToSave = { ...data };
+    if (typeof data.password === 'string' && data.password) {
+      const bcrypt = require('bcrypt');
+      dataToSave.password = await bcrypt.hash(data.password, 10);
+    }
+    return prisma.user.update({ where: { id }, data: dataToSave });
   });
 
   static deleteUser = catchServiceAsync(async (id: number) => {

@@ -1,24 +1,105 @@
 <!DOCTYPE html>
 <html>
+
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>New Project Comment</title>
   <style>
-    body { font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; background-color: #f3f4f6; margin: 0; padding: 40px 20px; -webkit-font-smoothing: antialiased; }
-    .wrapper { max-width: 600px; margin: 0 auto; background-color: #ffffff; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05); }
-    .header { background-color: #4f46e5; padding: 30px 40px; text-align: center; }
-    .header h1 { color: #ffffff; margin: 0; font-size: 24px; font-weight: 600; letter-spacing: 0.5px; }
-    .body { padding: 40px; color: #374151; font-size: 16px; line-height: 1.6; }
-    .body h2 { color: #111827; font-size: 20px; margin-top: 0; margin-bottom: 20px; }
-    .quote { border-left: 4px solid #4f46e5; margin: 25px 0; font-style: italic; color: #4b5563; background: #f9fafb; padding: 20px 24px; border-radius: 0 8px 8px 0; font-size: 15px; line-height: 1.7; }
-    .button-container { text-align: center; margin: 35px 0 15px; }
-    .button { background-color: #4f46e5; color: #ffffff !important; text-decoration: none; padding: 14px 32px; border-radius: 8px; font-weight: 600; display: inline-block; font-size: 16px; }
-    .footer { background-color: #f9fafb; padding: 25px 40px; text-align: center; border-top: 1px solid #e5e7eb; }
-    .footer p { color: #6b7280; font-size: 13px; margin: 0; line-height: 1.5; }
-    .footer a { color: #4f46e5; text-decoration: none; }
+    body {
+      font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+      background-color: #f3f4f6;
+      margin: 0;
+      padding: 40px 20px;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    .wrapper {
+      max-width: 600px;
+      margin: 0 auto;
+      background-color: #ffffff;
+      border-radius: 12px;
+      overflow: hidden;
+      box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+    }
+
+    .header {
+      background-color: #4f46e5;
+      padding: 30px 40px;
+      text-align: center;
+    }
+
+    .header h1 {
+      color: #ffffff;
+      margin: 0;
+      font-size: 24px;
+      font-weight: 600;
+      letter-spacing: 0.5px;
+    }
+
+    .body {
+      padding: 40px;
+      color: #374151;
+      font-size: 16px;
+      line-height: 1.6;
+    }
+
+    .body h2 {
+      color: #111827;
+      font-size: 20px;
+      margin-top: 0;
+      margin-bottom: 20px;
+    }
+
+    .quote {
+      border-left: 4px solid #4f46e5;
+      margin: 25px 0;
+      font-style: italic;
+      color: #4b5563;
+      background: #f9fafb;
+      padding: 20px 24px;
+      border-radius: 0 8px 8px 0;
+      font-size: 15px;
+      line-height: 1.7;
+    }
+
+    .button-container {
+      text-align: center;
+      margin: 35px 0 15px;
+    }
+
+    .button {
+      background-color: #4f46e5;
+      color: #ffffff !important;
+      text-decoration: none;
+      padding: 14px 32px;
+      border-radius: 8px;
+      font-weight: 600;
+      display: inline-block;
+      font-size: 16px;
+    }
+
+    .footer {
+      background-color: #f9fafb;
+      padding: 25px 40px;
+      text-align: center;
+      border-top: 1px solid #e5e7eb;
+    }
+
+    .footer p {
+      color: #6b7280;
+      font-size: 13px;
+      margin: 0;
+      line-height: 1.5;
+    }
+
+    .footer a {
+      color: #4f46e5;
+      text-decoration: none;
+    }
   </style>
 </head>
+
 <body>
   <div class="wrapper">
     <div class="header">
@@ -28,19 +109,20 @@
       <h2>New Comment on: {{projectName}}</h2>
       <p>Hello,</p>
       <p>An Admin has posted a new comment regarding a project you are assigned to. Here is what they said:</p>
-      
+
       <div class="quote">
         "{{comment}}"
       </div>
 
       <div class="button-container">
-        <a href="https://www.hrm.jevxo.com" class="button">View Project Updates</a>
+        <a href="https://hrm.jevxo.com/dashboard/projects/{{projectId}}" class="button">View Project Updates</a>
       </div>
     </div>
     <div class="footer">
       <p>&copy; {{year}} HRM System. All rights reserved.</p>
-      <p>Access your portal at <a href="https://www.hrm.jevxo.com">www.hrm.jevxo.com</a></p>
+      <p>Access your portal at <a href="https://hrm.jevxo.com">www.hrm.jevxo.com</a></p>
     </div>
   </div>
 </body>
+
 </html>

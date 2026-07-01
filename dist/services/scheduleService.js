@@ -15,10 +15,19 @@ const createSchedule = async (userId, dayOfWeek, startTime, endTime) => {
 };
 exports.createSchedule = createSchedule;
 const getSchedules = async (teamId) => {
-    const where = teamId ? { user: { teamId } } : {};
+    const where = teamId ? { user: { profile: { teamId } } } : {};
     return await prisma.schedule.findMany({
         where,
-        include: { user: { select: { id: true, name: true, email: true, teamId: true } } },
+        include: {
+            user: {
+                select: {
+                    id: true,
+                    name: true,
+                    email: true,
+                    profile: { select: { teamId: true } }
+                }
+            }
+        },
         orderBy: { dayOfWeek: 'asc' },
     });
 };

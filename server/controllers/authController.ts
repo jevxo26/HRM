@@ -2,6 +2,7 @@ import { Request, Response, NextFunction } from 'express';
 import { AuthService } from '../services/authService';
 import { catchAsync } from '../utils/catchAsync';
 import { sendResponse } from '../utils/sendResponse';
+import jwt from 'jsonwebtoken';
 
 export class AuthController {
   static register = catchAsync(async (req: Request, res: Response) => {
@@ -73,7 +74,15 @@ export class AuthController {
   });
 
   static logout = catchAsync(async (req: any, res: Response) => {
-    const userId = req.user?.userId;
+    let userId = req.user?.userId;
+    if (!userId && req.cookies?.refreshToken) {
+      try {
+        const decoded: any = jwt.verify(req.cookies.refreshToken, process.env.JWT_REFRESH_SECRET || 'refresh_secret');
+        userId = decoded.userId;
+      } catch (e) {
+        // Ignore invalid token on logout
+      }
+    }
     if (userId) {
       await AuthService.logoutUser(userId);
     }

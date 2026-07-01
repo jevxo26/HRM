@@ -50,7 +50,10 @@ export function LeaveFormModal({ open, onOpenChange, leave, onSuccess }: LeaveFo
         if (!token) return;
         try {
           const res = await fetch("/api/leaves/types", { headers: { Authorization: `Bearer ${token}` } });
-          if (res.ok) setLeaveTypes(await res.json());
+          if (res.ok) {
+            const result = await res.json();
+            setLeaveTypes(Array.isArray(result) ? result : result.data || []);
+          }
         } catch (error) {
           console.error("Failed to fetch leave types", error);
         }

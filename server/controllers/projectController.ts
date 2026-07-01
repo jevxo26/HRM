@@ -12,7 +12,7 @@ export const createProject = async (req: AuthRequest, res: Response): Promise<vo
       image = `/uploads/${req.file.filename}`;
     }
     
-    if (req.user?.role !== 'admin') {
+    if (['employee', 'hr'].includes(req.user?.role)) {
       res.status(403).json({ error: 'Forbidden' });
       return;
     }
@@ -35,7 +35,7 @@ export const getProjects = async (req: AuthRequest, res: Response): Promise<void
     const role = req.user?.role;
     
     let projects;
-    if (role === 'admin') {
+    if (!['employee', 'hr'].includes(role)) {
       projects = await projectService.getProjects();
     } else {
       projects = await projectService.getProjects(userId);
@@ -70,6 +70,40 @@ export const getProjects = async (req: AuthRequest, res: Response): Promise<void
   }
 };
 
+export const getProjectById = async (req: AuthRequest, res: Response): Promise<void> => {
+  try {
+    const { id } = req.params;
+    const { PrismaClient } = require('@prisma/client');
+    const prisma = new PrismaClient();
+
+    const project = await prisma.project.findUnique({
+      where: { id: parseInt(id as string, 10) },
+      include: {
+        tasks: {
+          include: {
+            assignedTo: { select: { id: true, name: true, email: true, profile: { select: { profilePicture: true } } } },
+            comments: {
+              include: {
+                user: { select: { id: true, name: true, email: true, profile: { select: { profilePicture: true } } } }
+              },
+              orderBy: { createdAt: 'desc' }
+            }
+          }
+        }
+      }
+    });
+
+    if (!project) {
+      res.status(404).json({ error: 'Project not found' });
+      return;
+    }
+
+    res.status(200).json(project);
+  } catch (error: any) {
+    res.status(500).json({ error: 'Failed to fetch project' });
+  }
+};
+
 export const updateProject = async (req: AuthRequest, res: Response): Promise<void> => {
   try {
     const { name, description, progress } = req.body;
@@ -80,7 +114,7 @@ export const updateProject = async (req: AuthRequest, res: Response): Promise<vo
       image = `/uploads/${req.file.filename}`;
     }
     
-    if (req.user?.role !== 'admin') {
+    if (['employee', 'hr'].includes(req.user?.role)) {
       res.status(403).json({ error: 'Forbidden' });
       return;
     }
@@ -96,7 +130,7 @@ export const deleteProject = async (req: AuthRequest, res: Response): Promise<vo
   try {
     const { id } = req.params;
     
-    if (req.user?.role !== 'admin') {
+    if (['employee', 'hr'].includes(req.user?.role)) {
       res.status(403).json({ error: 'Forbidden' });
       return;
     }
@@ -113,7 +147,7 @@ export const addComment = async (req: AuthRequest, res: Response): Promise<void>
     const projectId = parseInt(req.params.id as string);
     const { comment } = req.body;
     
-    if (req.user?.role !== 'admin') {
+    if (['employee', 'hr'].includes(req.user?.role)) {
       res.status(403).json({ error: 'Forbidden' });
       return;
     }

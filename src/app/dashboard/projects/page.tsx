@@ -15,6 +15,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { ProjectFormModal } from "./ProjectFormModal";
 import { toast } from "sonner";
+import { useRouter } from "next/navigation";
 
 interface Project {
   id: number;
@@ -30,6 +31,7 @@ interface Project {
 }
 
 export default function ProjectsPage() {
+  const router = useRouter();
   const [projects, setProjects] = useState<Project[]>([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
@@ -178,7 +180,8 @@ export default function ProjectsPage() {
                   filteredProjects.map((project, index) => (
                     <TableRow 
                       key={project.id} 
-                      className={`group border-b border-slate-100/50 dark:border-slate-800/40 transition-all duration-300 hover:bg-white/80 dark:hover:bg-slate-800/50 hover:shadow-[0_4px_20px_-4px_rgba(0,0,0,0.05)] dark:hover:shadow-[0_4px_20px_-4px_rgba(0,0,0,0.2)] ${index % 2 === 0 ? 'bg-transparent' : 'bg-slate-50/20 dark:bg-slate-900/20'}`}
+                      onClick={() => router.push(`/dashboard/projects/${project.id}`)}
+                      className={`group cursor-pointer border-b border-slate-100/50 dark:border-slate-800/40 transition-all duration-300 hover:bg-white/80 dark:hover:bg-slate-800/50 hover:shadow-[0_4px_20px_-4px_rgba(0,0,0,0.05)] dark:hover:shadow-[0_4px_20px_-4px_rgba(0,0,0,0.2)] ${index % 2 === 0 ? 'bg-transparent' : 'bg-slate-50/20 dark:bg-slate-900/20'}`}
                     >
                       <TableCell className="px-8 py-5">
                         <div className="flex items-center gap-3">
@@ -229,7 +232,8 @@ export default function ProjectsPage() {
                               variant="ghost" 
                               size="icon"
                               className="h-9 w-9 text-slate-400 hover:text-indigo-600 hover:bg-indigo-50 dark:hover:bg-indigo-500/20 rounded-xl transition-all shadow-sm hover:shadow"
-                              onClick={() => {
+                              onClick={(e) => {
+                                e.stopPropagation();
                                 setEditingProject(project);
                                 setIsModalOpen(true);
                               }}
@@ -240,7 +244,10 @@ export default function ProjectsPage() {
                               variant="ghost" 
                               size="icon"
                               className="h-9 w-9 text-slate-400 hover:text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-500/20 rounded-xl transition-all shadow-sm hover:shadow"
-                              onClick={() => handleDelete(project.id)}
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                handleDelete(project.id);
+                              }}
                             >
                               <Trash2 className="h-4 w-4" />
                             </Button>

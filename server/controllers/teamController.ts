@@ -6,8 +6,8 @@ export const createTeam = async (req: AuthRequest, res: Response): Promise<void>
   try {
     const { name, description } = req.body;
     
-    if (req.user?.role !== 'admin') {
-      res.status(403).json({ error: 'Forbidden. Admin access required.' });
+    if (!req.user || (req.user.role !== 'admin' && req.user.role !== 'employee')) {
+      res.status(403).json({ error: 'Forbidden. Access required.' });
       return;
     }
 

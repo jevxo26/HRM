@@ -4,7 +4,7 @@ import * as attendanceService from '../services/attendanceService';
 
 export const checkIn = async (req: AuthRequest, res: Response): Promise<void> => {
   try {
-    const userId = req.user?.id;
+    const userId = req.user?.userId;
     if (!userId) {
       res.status(401).json({ error: 'Unauthorized' });
       return;
@@ -18,7 +18,7 @@ export const checkIn = async (req: AuthRequest, res: Response): Promise<void> =>
 
 export const checkOut = async (req: AuthRequest, res: Response): Promise<void> => {
   try {
-    const userId = req.user?.id;
+    const userId = req.user?.userId;
     if (!userId) {
       res.status(401).json({ error: 'Unauthorized' });
       return;
@@ -32,15 +32,15 @@ export const checkOut = async (req: AuthRequest, res: Response): Promise<void> =
 
 export const getAttendances = async (req: AuthRequest, res: Response): Promise<void> => {
   try {
-    const userId = req.user?.id;
+    const userId = req.user?.userId;
     const role = req.user?.role;
     
     let attendances;
-    if (role === 'admin') {
-      // Admin sees all
+    if (role !== 'employee') {
+      // Non-employees see all
       attendances = await attendanceService.getAllAttendances();
     } else {
-      // Employee sees own
+      // Employees see own
       attendances = await attendanceService.getAllAttendances(userId);
     }
     

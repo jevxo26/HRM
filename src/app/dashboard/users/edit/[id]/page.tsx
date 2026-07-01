@@ -1,17 +1,18 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, use } from "react";
 import { UserForm } from "@/components/users/UserForm";
 import { Loader2 } from "lucide-react";
 
-export default function EditUserPage({ params }: { params: { id: string } }) {
+export default function EditUserPage({ params }: { params: Promise<{ id: string }> }) {
+  const { id } = use(params);
   const [loading, setLoading] = useState(true);
   const [userData, setUserData] = useState<any>(null);
   const [profileData, setProfileData] = useState<any>(null);
 
   useEffect(() => {
     fetchData();
-  }, []);
+  }, [id]);
 
   const fetchData = async () => {
     try {
@@ -19,16 +20,16 @@ export default function EditUserPage({ params }: { params: { id: string } }) {
       if (!token) return;
 
       // Fetch user data
-      const userRes = await fetch(`/api/users/${params.id}`, {
+      const userRes = await fetch(`/api/users/${id}`, {
         headers: { Authorization: `Bearer ${token}` }
       });
       if (userRes.ok) {
         const data = await userRes.json();
-        setUserData(data);
+        setUserData(data.data || data); // Just in case it's nested
       }
 
       // Fetch profile data
-      const profileRes = await fetch(`/api/profile/${params.id}`, {
+      const profileRes = await fetch(`/api/profile/${id}`, {
         headers: { Authorization: `Bearer ${token}` }
       });
       if (profileRes.ok) {

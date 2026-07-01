@@ -32,6 +32,7 @@ model User {
   schedules     Schedule[]
   tasks         Task[]
   leaveRequests LeaveRequest[]
+  taskComments  TaskComment[]
 }
 
 model Team {
@@ -86,6 +87,9 @@ model Task {
   title       String
   description String?
   status      String   @default("pending") // pending, in_progress, completed
+  priority    String   @default("medium") // low, medium, high
+  dueDate     DateTime?
+  comments    TaskComment[]
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 }
@@ -177,6 +181,17 @@ model LeaveRequest {
   reason  String?
   status  String  @default("pending") // pending, approved, rejected
 
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model TaskComment {
+  id        Int      @id @default(autoincrement())
+  taskId    Int
+  task      Task     @relation(fields: [taskId], references: [id], onDelete: Cascade)
+  userId    Int
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  content   String
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 }

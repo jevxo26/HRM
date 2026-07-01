@@ -11,7 +11,7 @@ export const createSchedule = async (req: AuthRequest, res: Response): Promise<v
     let { userId, dayOfWeek, startTime, endTime } = req.body;
     
     if (req.user?.role !== 'admin') {
-      userId = req.user?.id; // force to their own ID
+      userId = req.user?.userId; // force to their own ID
     }
 
     if (!userId || !dayOfWeek || !startTime || !endTime) {
@@ -30,8 +30,8 @@ export const getSchedules = async (req: AuthRequest, res: Response): Promise<voi
   try {
     let teamId = null;
 
-    if (req.user?.role === 'employee' || req.user?.role === 'teamlead') {
-      const user = await prisma.user.findUnique({ where: { id: req.user.id }, include: { profile: true } });
+    if (req.user?.role === 'employee') {
+      const user = await prisma.user.findUnique({ where: { id: req.user.userId }, include: { profile: true } });
       teamId = user?.profile?.teamId || null;
     }
 

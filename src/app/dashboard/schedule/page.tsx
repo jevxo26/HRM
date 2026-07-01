@@ -24,6 +24,7 @@ export default function SchedulePage() {
   const [search, setSearch] = useState("");
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingSchedule, setEditingSchedule] = useState<Schedule | null>(null);
+  const [userRole, setUserRole] = useState<string>("employee");
 
   const fetchSchedules = async () => {
     setLoading(true);
@@ -31,9 +32,16 @@ export default function SchedulePage() {
     if (!token) return;
 
     try {
-      const res = await fetch("/api/schedules", {
-        headers: { Authorization: `Bearer ${token}` }
-      });
+      const [res, authRes] = await Promise.all([
+        fetch("/api/schedules", { headers: { Authorization: `Bearer ${token}` } }),
+        fetch("/api/auth/me", { headers: { Authorization: `Bearer ${token}` } })
+      ]);
+      
+      if (authRes.ok) {
+        const authData = await authRes.json();
+        setUserRole(authData.data?.role || authData.role || 'employee');
+      }
+
       if (res.ok) {
         const data = await res.json();
         const schedulesArray = Array.isArray(data) ? data : (data.data || []);
@@ -208,6 +216,7 @@ export default function SchedulePage() {
         onOpenChange={setIsModalOpen}
         schedule={editingSchedule}
         onSuccess={fetchSchedules}
+        userRole={userRole}
       />
     </div>
   );

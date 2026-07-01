@@ -4,10 +4,10 @@ import * as taskService from '../services/taskService';
 
 export const createTask = async (req: AuthRequest, res: Response): Promise<void> => {
   try {
-    const { projectId, title, description, userId } = req.body;
+    const { projectId, title, description, userId, priority, dueDate } = req.body;
     
-    if (req.user?.role !== 'admin') {
-      res.status(403).json({ error: 'Forbidden. Admin access required.' });
+    if (['employee', 'hr'].includes(req.user?.role)) {
+      res.status(403).json({ error: 'Forbidden. Access restricted.' });
       return;
     }
 
@@ -16,7 +16,8 @@ export const createTask = async (req: AuthRequest, res: Response): Promise<void>
       return;
     }
 
-    const task = await taskService.createTask(projectId, title, description, userId);
+    const parsedDueDate = dueDate ? new Date(dueDate) : undefined;
+    const task = await taskService.createTask(projectId, title, description, userId, priority || 'medium', parsedDueDate);
     
     if (userId) {
       try {
@@ -50,7 +51,7 @@ export const getTasks = async (req: AuthRequest, res: Response): Promise<void> =
     const role = req.user?.role;
     
     let tasks;
-    if (role === 'admin') {
+    if (!['employee', 'hr'].includes(role)) {
       tasks = await taskService.getTasks();
     } else {
       tasks = await taskService.getTasks(userId);
@@ -76,6 +77,34 @@ export const updateTaskStatus = async (req: AuthRequest, res: Response): Promise
 
     const task = await taskService.updateTaskStatus(taskId, status, userId, role);
     res.status(200).json({ message: 'Task status updated', task });
+  } catch (error: any) {
+    res.status(400).json({ error: error.message });
+  }
+};
+
+export const updateTask = async (req: AuthRequest, res: Response): Promise<void> => {
+  try {
+    const taskId = parseInt(req.params.id as string);
+    const { title, description, status, projectId, userId, priority, dueDate } = req.body;
+    const currentUserId = req.user?.id;
+    const role = req.user?.role;
+
+    if (!currentUserId) {
+      res.status(401).json({ error: 'Unauthorized' });
+      return;
+    }
+
+    const data: any = {};
+    if (title !== undefined) data.title = title;
+    if (description !== undefined) data.description = description;
+    if (status !== undefined) data.status = status;
+    if (projectId !== undefined) data.projectId = projectId;
+    if (userId !== undefined) data.userId = userId;
+    if (priority !== undefined) data.priority = priority;
+    if (dueDate !== undefined) data.dueDate = dueDate ? new Date(dueDate) : null;
+
+    const task = await taskService.updateTask(taskId, data, currentUserId, role);
+    res.status(200).json({ message: 'Task updated', task });
   } catch (error: any) {
     res.status(400).json({ error: error.message });
   }

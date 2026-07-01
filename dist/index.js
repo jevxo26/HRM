@@ -52,10 +52,10 @@ app.prepare().then(async () => {
     server.use('/api/auth', authRoutes_1.default);
     server.use('/api/upload', uploadRoutes_1.default);
     server.use('/api/attendance', attendanceRoutes_1.default);
-    server.use('/api/schedule', scheduleRoutes_1.default);
+    server.use('/api/schedules', scheduleRoutes_1.default);
     server.use('/api/projects', projectRoutes_1.default);
     server.use('/api/tasks', taskRoutes_1.default);
-    server.use('/api/teams', teamRoutes_1.default);
+    server.use('/api/team', teamRoutes_1.default);
     server.use('/api/leaves', leaveRoutes_1.default);
     server.use('/api/profile', profileRoutes_1.default);
     // Serve uploaded files statically

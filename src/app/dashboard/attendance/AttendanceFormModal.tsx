@@ -27,9 +27,10 @@ interface AttendanceFormModalProps {
   onOpenChange: (open: boolean) => void;
   record?: AttendanceRecord | null;
   onSuccess: () => void;
+  userRole?: string;
 }
 
-export function AttendanceFormModal({ open, onOpenChange, record, onSuccess }: AttendanceFormModalProps) {
+export function AttendanceFormModal({ open, onOpenChange, record, onSuccess, userRole }: AttendanceFormModalProps) {
   const [loading, setLoading] = useState(false);
   const [users, setUsers] = useState<User[]>([]);
   const [formData, setFormData] = useState({
@@ -131,16 +132,18 @@ export function AttendanceFormModal({ open, onOpenChange, record, onSuccess }: A
             </DialogDescription>
           </DialogHeader>
           <div className="grid gap-4 py-4">
-            <div className="space-y-2">
-              <Label htmlFor="userId">User</Label>
-              <Select
-                options={users.map(u => ({ value: u.id.toString(), label: u.name }))}
-                value={formData.userId ? { value: formData.userId, label: users.find(u => u.id.toString() === formData.userId)?.name } : null}
-                onChange={(option) => setFormData({ ...formData, userId: option?.value || "" })}
-                placeholder="Select a user"
-                className="text-sm"
-              />
-            </div>
+            {userRole !== 'employee' && (
+              <div className="space-y-2">
+                <Label htmlFor="userId">User</Label>
+                <Select
+                  options={users.map(u => ({ value: u.id.toString(), label: u.name }))}
+                  value={formData.userId ? { value: formData.userId, label: users.find(u => u.id.toString() === formData.userId)?.name } : null}
+                  onChange={(option) => setFormData({ ...formData, userId: option?.value || "" })}
+                  placeholder="Select a user"
+                  className="text-sm"
+                />
+              </div>
+            )}
             
             <div className="space-y-2">
               <Label htmlFor="date">Date</Label>
@@ -173,19 +176,21 @@ export function AttendanceFormModal({ open, onOpenChange, record, onSuccess }: A
               />
             </div>
 
-            <div className="space-y-2">
-              <Label htmlFor="status">Status</Label>
-              <Select
-                options={[
-                  { value: "present", label: "Present" },
-                  { value: "absent", label: "Absent" },
-                  { value: "leave", label: "Leave" },
-                ]}
-                value={{ value: formData.status, label: formData.status.replace(/\b\w/g, l => l.toUpperCase()) }}
-                onChange={(option) => setFormData({ ...formData, status: option?.value || "present" })}
-                className="text-sm"
-              />
-            </div>
+            {userRole !== 'employee' && (
+              <div className="space-y-2">
+                <Label htmlFor="status">Status</Label>
+                <Select
+                  options={[
+                    { value: "present", label: "Present" },
+                    { value: "absent", label: "Absent" },
+                    { value: "leave", label: "Leave" },
+                  ]}
+                  value={{ value: formData.status, label: formData.status.replace(/\b\w/g, l => l.toUpperCase()) }}
+                  onChange={(option) => setFormData({ ...formData, status: option?.value || "present" })}
+                  className="text-sm"
+                />
+              </div>
+            )}
           </div>
           <DialogFooter>
             <Button type="button" variant="outline" onClick={() => onOpenChange(false)} disabled={loading}>

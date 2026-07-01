@@ -16,10 +16,20 @@ UserService.getUserById = (0, catchServiceAsync_1.catchServiceAsync)(async (id) 
     return prisma.user.findUnique({ where: { id } });
 });
 UserService.createUser = (0, catchServiceAsync_1.catchServiceAsync)(async (data) => {
-    return prisma.user.create({ data });
+    const dataToSave = Object.assign({}, data);
+    if (data.password) {
+        const bcrypt = require('bcrypt');
+        dataToSave.password = await bcrypt.hash(data.password, 10);
+    }
+    return prisma.user.create({ data: dataToSave });
 });
 UserService.updateUser = (0, catchServiceAsync_1.catchServiceAsync)(async (id, data) => {
-    return prisma.user.update({ where: { id }, data });
+    const dataToSave = Object.assign({}, data);
+    if (typeof data.password === 'string' && data.password) {
+        const bcrypt = require('bcrypt');
+        dataToSave.password = await bcrypt.hash(data.password, 10);
+    }
+    return prisma.user.update({ where: { id }, data: dataToSave });
 });
 UserService.deleteUser = (0, catchServiceAsync_1.catchServiceAsync)(async (id) => {
     return prisma.user.delete({ where: { id } });

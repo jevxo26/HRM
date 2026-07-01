@@ -15,6 +15,8 @@ interface Task {
   status: string;
   projectId: number;
   userId?: number;
+  priority?: string;
+  dueDate?: string;
 }
 
 interface Project {
@@ -42,6 +44,8 @@ export function TaskFormModal({ open, onOpenChange, task, onSuccess }: TaskFormM
     title: "",
     description: "",
     status: "pending",
+    priority: "medium",
+    dueDate: "",
     projectId: "",
     userId: "",
   });
@@ -57,7 +61,10 @@ export function TaskFormModal({ open, onOpenChange, task, onSuccess }: TaskFormM
             fetch("/api/users", { headers: { Authorization: `Bearer ${token}` } })
           ]);
           if (projRes.ok) setProjects(await projRes.json());
-          if (userRes.ok) setUsers(await userRes.json());
+          if (userRes.ok) {
+            const data = await userRes.json();
+            setUsers(Array.isArray(data) ? data : data.data || []);
+          }
         } catch (error) {
           console.error("Failed to fetch dependencies", error);
         }
@@ -72,6 +79,8 @@ export function TaskFormModal({ open, onOpenChange, task, onSuccess }: TaskFormM
         title: task.title || "",
         description: task.description || "",
         status: task.status || "pending",
+        priority: task.priority || "medium",
+        dueDate: task.dueDate ? new Date(task.dueDate).toISOString().slice(0, 16) : "",
         projectId: task.projectId?.toString() || "",
         userId: task.userId?.toString() || "",
       });
@@ -80,6 +89,8 @@ export function TaskFormModal({ open, onOpenChange, task, onSuccess }: TaskFormM
         title: "",
         description: "",
         status: "pending",
+        priority: "medium",
+        dueDate: "",
         projectId: "",
         userId: "",
       });
@@ -102,6 +113,8 @@ export function TaskFormModal({ open, onOpenChange, task, onSuccess }: TaskFormM
         title: formData.title,
         description: formData.description,
         status: formData.status,
+        priority: formData.priority,
+        dueDate: formData.dueDate ? new Date(formData.dueDate).toISOString() : null,
         projectId: parseInt(formData.projectId, 10),
         userId: formData.userId ? parseInt(formData.userId, 10) : null,
       };
@@ -170,6 +183,30 @@ export function TaskFormModal({ open, onOpenChange, task, onSuccess }: TaskFormM
                 onChange={(option) => setFormData({ ...formData, status: option?.value || "pending" })}
                 className="text-sm"
               />
+            </div>
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label htmlFor="priority">Priority</Label>
+                <Select
+                  options={[
+                    { value: "low", label: "Low" },
+                    { value: "medium", label: "Medium" },
+                    { value: "high", label: "High" },
+                  ]}
+                  value={{ value: formData.priority, label: formData.priority.charAt(0).toUpperCase() + formData.priority.slice(1) }}
+                  onChange={(option) => setFormData({ ...formData, priority: option?.value || "medium" })}
+                  className="text-sm"
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="dueDate">Due Date & Time</Label>
+                <Input
+                  id="dueDate"
+                  type="datetime-local"
+                  value={formData.dueDate}
+                  onChange={(e) => setFormData({ ...formData, dueDate: e.target.value })}
+                />
+              </div>
             </div>
             <div className="space-y-2">
               <Label htmlFor="projectId">Project</Label>

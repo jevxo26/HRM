@@ -7,5 +7,7 @@ const router = (0, express_1.Router)();
 router.use(authMiddleware_1.verifyToken);
 router.post('/', teamController_1.createTeam);
 router.get('/', teamController_1.getTeams);
+router.put('/:id', teamController_1.updateTeam);
+router.delete('/:id', teamController_1.deleteTeam);
 router.post('/assign', teamController_1.assignUser);
 exports.default = router;

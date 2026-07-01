@@ -61,9 +61,9 @@ const getSchedules = async (req, res) => {
     var _a, _b;
     try {
         let teamId = null;
-        if (((_a = req.user) === null || _a === void 0 ? void 0 : _a.role) === 'employee' || ((_b = req.user) === null || _b === void 0 ? void 0 : _b.role) === 'teamlead') {
-            const user = await prisma.user.findUnique({ where: { id: req.user.id } });
-            teamId = (user === null || user === void 0 ? void 0 : user.teamId) || null;
+        if (((_a = req.user) === null || _a === void 0 ? void 0 : _a.role) === 'employee') {
+            const user = await prisma.user.findUnique({ where: { id: req.user.id }, include: { profile: true } });
+            teamId = ((_b = user === null || user === void 0 ? void 0 : user.profile) === null || _b === void 0 ? void 0 : _b.teamId) || null;
         }
         const schedules = await scheduleService.getSchedules(teamId);
         res.status(200).json(schedules);
