@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useEffect, useState, useRef } from "react";
-import { UserCircle, Save, Loader2, Upload, Briefcase, Mail, Phone, MapPin, Building, Activity, ShieldCheck, CheckCircle2 } from "lucide-react";
+import { UserCircle, Save, Loader2, Upload, Briefcase, Mail, Phone, MapPin, Building, Activity, ShieldCheck, CheckCircle2, UsersRound } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
@@ -262,6 +262,12 @@ export default function ProfilePage() {
                 <Label className="text-slate-600 font-medium flex items-center gap-2"><Building size={14} className="text-slate-400" /> Department</Label>
                 <Input name="department" value={profile?.department || ""} onChange={handleChange} placeholder="e.g. Engineering" 
                   className="bg-white/50 border-white/50 focus:bg-white focus:border-indigo-400 focus:ring-indigo-400/20 transition-all rounded-xl shadow-sm" />
+              </div>
+              
+              <div className="space-y-2">
+                <Label className="text-slate-600 font-medium flex items-center gap-2"><UsersRound size={14} className="text-slate-400" /> Team</Label>
+                <Input value={profile?.team?.name || "Unassigned"} readOnly
+                  className="bg-slate-100/50 border-slate-200 text-slate-500 cursor-not-allowed transition-all rounded-xl shadow-sm focus-visible:ring-0" />
               </div>
             </div>
           </motion.div>

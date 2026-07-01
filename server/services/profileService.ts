@@ -6,8 +6,9 @@ export const getProfileByUserId = async (userId: number) => {
   return await prisma.employeeProfile.findUnique({
     where: { userId },
     include: {
+      team: true,
       user: {
-        select: { id: true, name: true, email: true, role: true, team: true }
+        select: { id: true, name: true, email: true, role: true }
       }
     }
   });
@@ -27,8 +28,9 @@ export const upsertProfile = async (userId: number, profileData: any) => {
 export const getAllProfiles = async () => {
   return await prisma.employeeProfile.findMany({
     include: {
+      team: true,
       user: {
-        select: { id: true, name: true, email: true, role: true, team: true }
+        select: { id: true, name: true, email: true, role: true }
       }
     }
   });
