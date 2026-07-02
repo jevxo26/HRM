@@ -1,6 +1,6 @@
 import { Router } from 'express';
 import { checkIn, checkOut, getAttendances, manualCreate, manualUpdate, manualDelete } from '../controllers/attendanceController';
-import { verifyToken, isAdmin } from '../middlewares/authMiddleware';
+import { verifyToken, isAdmin, authorizeRoles } from '../middlewares/authMiddleware';
 
 const router = Router();
 
@@ -14,6 +14,6 @@ router.get('/', getAttendances);
 // Manual admin routes
 router.post('/manual', isAdmin, manualCreate);
 router.put('/:id', isAdmin, manualUpdate);
-router.delete('/:id', isAdmin, manualDelete);
+router.delete('/:id', authorizeRoles('admin', 'cto', 'ceo', 'founder', 'teamlead'), manualDelete);
 
 export default router;
