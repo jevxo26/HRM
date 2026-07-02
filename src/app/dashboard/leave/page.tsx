@@ -23,6 +23,7 @@ export default function LeavePage() {
   const [search, setSearch] = useState("");
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingRequest, setEditingRequest] = useState<LeaveRequest | null>(null);
+  const [userRole, setUserRole] = useState<string>("");
 
   const fetchLeaves = async () => {
     setLoading(true);
@@ -65,6 +66,15 @@ export default function LeavePage() {
   };
 
   useEffect(() => {
+    const token = localStorage.getItem("token");
+    if (token) {
+      try {
+        const decoded = JSON.parse(atob(token.split('.')[1]));
+        setUserRole(decoded.role || "");
+      } catch (e) {
+        console.error("Failed to decode token", e);
+      }
+    }
     fetchLeaves();
   }, []);
 
@@ -178,18 +188,20 @@ export default function LeavePage() {
                       </TableCell>
                       <TableCell className="text-right px-8 py-5">
                         <div className="flex items-center justify-end gap-2 opacity-0 group-hover:opacity-100 transition-all duration-300 translate-x-2 group-hover:translate-x-0">
-                          <Button 
-                            variant="ghost" 
-                            size="icon"
-                            title="Update Status"
-                            className="h-9 w-9 text-slate-400 hover:text-indigo-600 hover:bg-indigo-50 dark:hover:bg-indigo-500/20 rounded-xl transition-all shadow-sm hover:shadow"
-                            onClick={() => {
-                              setEditingRequest(req);
-                              setIsModalOpen(true);
-                            }}
-                          >
-                            <Edit className="h-4 w-4" />
-                          </Button>
+                          {['cto', 'ceo', 'teamlead', 'hr', 'founder', 'admin'].includes(userRole) && (
+                            <Button 
+                              variant="ghost" 
+                              size="icon"
+                              title="Update Status"
+                              className="h-9 w-9 text-slate-400 hover:text-indigo-600 hover:bg-indigo-50 dark:hover:bg-indigo-500/20 rounded-xl transition-all shadow-sm hover:shadow"
+                              onClick={() => {
+                                setEditingRequest(req);
+                                setIsModalOpen(true);
+                              }}
+                            >
+                              <Edit className="h-4 w-4" />
+                            </Button>
+                          )}
                         </div>
                       </TableCell>
                     </TableRow>

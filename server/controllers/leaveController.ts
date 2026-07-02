@@ -84,8 +84,18 @@ export class LeaveController {
 
   async getMyLeaves(req: Request, res: Response): Promise<void> {
     try {
-      const userId = (req as any).user.userId;
-      const leaves = await leaveService.getMyLeaves(userId);
+      const user = (req as any).user;
+      const userId = user.userId;
+      const role = user.role;
+      let leaves;
+      
+      const allAccessRoles = ['cto', 'ceo', 'teamlead', 'hr', 'founder'];
+      if (allAccessRoles.includes(role)) {
+        leaves = await leaveService.getAllLeaves();
+      } else {
+        leaves = await leaveService.getMyLeaves(userId);
+      }
+      
       res.status(200).json({ success: true, data: leaves });
     } catch (error: any) {
       res.status(500).json({ success: false, message: error.message });
