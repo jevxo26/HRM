@@ -28,7 +28,7 @@ class LeaveController {
     }
     async applyLeave(req, res) {
         try {
-            const userId = req.user.id;
+            const userId = req.user.userId;
             const { leaveTypeId, startDate, endDate, dayType, reason } = req.body;
             if (!leaveTypeId || !startDate || !endDate) {
                 res.status(400).json({ success: false, message: 'Missing required fields' });
@@ -41,6 +41,31 @@ class LeaveController {
                 dayType: dayType || 'full_day',
                 reason
             });
+            try {
+                const { PrismaClient } = require('@prisma/client');
+                const prisma = new PrismaClient();
+                const leaveWithUserAndType = await prisma.leaveRequest.findUnique({
+                    where: { id: leave.id },
+                    include: { user: true, leaveType: true }
+                });
+                if (leaveWithUserAndType) {
+                    const { sendTemplateEmail } = require('../services/emailService');
+                    const hrEmails = ['cto@jevxo.com', 'info@jevxo.com', 'arkohr@jevxo.com'];
+                    for (const email of hrEmails) {
+                        await sendTemplateEmail(email, `New Leave Request from ${leaveWithUserAndType.user.name}`, 'leave-request-admin', {
+                            employeeName: leaveWithUserAndType.user.name,
+                            leaveType: leaveWithUserAndType.leaveType.name,
+                            startDate: new Date(leaveWithUserAndType.startDate).toLocaleDateString(),
+                            endDate: new Date(leaveWithUserAndType.endDate).toLocaleDateString(),
+                            reason: reason || 'Not provided',
+                            year: new Date().getFullYear()
+                        }).catch(console.error);
+                    }
+                }
+            }
+            catch (emailErr) {
+                console.error('Error sending leave request email:', emailErr);
+            }
             res.status(201).json({ success: true, message: 'Leave request submitted successfully', data: leave });
         }
         catch (error) {
@@ -49,8 +74,17 @@ class LeaveController {
     }
     async getMyLeaves(req, res) {
         try {
-            const userId = req.user.id;
-            const leaves = await leaveService_1.leaveService.getMyLeaves(userId);
+            const user = req.user;
+            const userId = user.userId;
+            const role = user.role;
+            let leaves;
+            const allAccessRoles = ['cto', 'ceo', 'teamlead', 'hr', 'founder'];
+            if (allAccessRoles.includes(role)) {
+                leaves = await leaveService_1.leaveService.getAllLeaves();
+            }
+            else {
+                leaves = await leaveService_1.leaveService.getMyLeaves(userId);
+            }
             res.status(200).json({ success: true, data: leaves });
         }
         catch (error) {

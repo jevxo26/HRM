@@ -7,4 +7,5 @@ const router = (0, express_1.Router)();
 router.use(authMiddleware_1.verifyToken);
 router.post('/', scheduleController_1.createSchedule);
 router.get('/', scheduleController_1.getSchedules);
+router.delete('/:id', scheduleController_1.deleteSchedule);
 exports.default = router;

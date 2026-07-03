@@ -251,7 +251,7 @@ export default function ProjectsPage() {
                               className="h-9 w-9 text-slate-400 hover:text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-500/20 rounded-xl transition-all shadow-sm hover:shadow"
                               onClick={(e) => {
                                 e.stopPropagation();
-                                handleDelete(project.id);
+                                setDeleteId(project.id);
                               }}
                             >
                               <Trash2 className="h-4 w-4" />

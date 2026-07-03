@@ -12,5 +12,5 @@ router.get('/', attendanceController_1.getAttendances);
 // Manual admin routes
 router.post('/manual', authMiddleware_1.isAdmin, attendanceController_1.manualCreate);
 router.put('/:id', authMiddleware_1.isAdmin, attendanceController_1.manualUpdate);
-router.delete('/:id', authMiddleware_1.isAdmin, attendanceController_1.manualDelete);
+router.delete('/:id', attendanceController_1.manualDelete);
 exports.default = router;

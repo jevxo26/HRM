@@ -3,7 +3,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.authorizeRoles = exports.isAdmin = exports.verifyToken = void 0;
+exports.isNotEmployee = exports.authorizeRoles = exports.isAdmin = exports.verifyToken = void 0;
 const jsonwebtoken_1 = __importDefault(require("jsonwebtoken"));
 const verifyToken = (req, res, next) => {
     const authHeader = req.headers.authorization;
@@ -19,6 +19,11 @@ const verifyToken = (req, res, next) => {
     try {
         const secret = process.env.JWT_SECRET || 'fallback_secret';
         const decoded = jsonwebtoken_1.default.verify(token, secret);
+        // Normalize user ID to support both old and new token formats
+        if (decoded.id && !decoded.userId)
+            decoded.userId = decoded.id;
+        if (decoded.userId && !decoded.id)
+            decoded.id = decoded.userId;
         req.user = decoded;
         next();
     }
@@ -47,3 +52,12 @@ const authorizeRoles = (...allowedRoles) => {
     };
 };
 exports.authorizeRoles = authorizeRoles;
+const isNotEmployee = (req, res, next) => {
+    if (req.user && req.user.role !== 'employee') {
+        next();
+    }
+    else {
+        res.status(403).json({ error: 'Access denied. Employees cannot perform this action.' });
+    }
+};
+exports.isNotEmployee = isNotEmployee;

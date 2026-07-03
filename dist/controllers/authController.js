@@ -1,10 +1,14 @@
 "use strict";
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
 var _a;
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.AuthController = void 0;
 const authService_1 = require("../services/authService");
 const catchAsync_1 = require("../utils/catchAsync");
 const sendResponse_1 = require("../utils/sendResponse");
+const jsonwebtoken_1 = __importDefault(require("jsonwebtoken"));
 class AuthController {
 }
 exports.AuthController = AuthController;
@@ -71,8 +75,17 @@ AuthController.refreshToken = (0, catchAsync_1.catchAsync)(async (req, res) => {
     (0, sendResponse_1.sendResponse)(res, { statusCode: 200, message: 'Token refreshed', data: result });
 });
 AuthController.logout = (0, catchAsync_1.catchAsync)(async (req, res) => {
-    var _b;
-    const userId = (_b = req.user) === null || _b === void 0 ? void 0 : _b.userId;
+    var _b, _c;
+    let userId = (_b = req.user) === null || _b === void 0 ? void 0 : _b.userId;
+    if (!userId && ((_c = req.cookies) === null || _c === void 0 ? void 0 : _c.refreshToken)) {
+        try {
+            const decoded = jsonwebtoken_1.default.verify(req.cookies.refreshToken, process.env.JWT_REFRESH_SECRET || 'refresh_secret');
+            userId = decoded.userId;
+        }
+        catch (e) {
+            // Ignore invalid token on logout
+        }
+    }
     if (userId) {
         await authService_1.AuthService.logoutUser(userId);
     }

@@ -33,7 +33,7 @@ var __importStar = (this && this.__importStar) || (function () {
     };
 })();
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.addComment = exports.deleteProject = exports.updateProject = exports.getProjects = exports.createProject = void 0;
+exports.addComment = exports.deleteProject = exports.updateProject = exports.getProjectById = exports.getProjects = exports.createProject = void 0;
 const projectService = __importStar(require("../services/projectService"));
 const createProject = async (req, res) => {
     var _a;
@@ -44,7 +44,7 @@ const createProject = async (req, res) => {
         if (req.file) {
             image = `/uploads/${req.file.filename}`;
         }
-        if (((_a = req.user) === null || _a === void 0 ? void 0 : _a.role) !== 'admin') {
+        if (['employee', 'hr'].includes((_a = req.user) === null || _a === void 0 ? void 0 : _a.role)) {
             res.status(403).json({ error: 'Forbidden' });
             return;
         }
@@ -66,7 +66,7 @@ const getProjects = async (req, res) => {
         const userId = (_a = req.user) === null || _a === void 0 ? void 0 : _a.id;
         const role = (_b = req.user) === null || _b === void 0 ? void 0 : _b.role;
         let projects;
-        if (role === 'admin') {
+        if (!['employee', 'hr'].includes(role)) {
             projects = await projectService.getProjects();
         }
         else {
@@ -97,6 +97,38 @@ const getProjects = async (req, res) => {
     }
 };
 exports.getProjects = getProjects;
+const getProjectById = async (req, res) => {
+    try {
+        const { id } = req.params;
+        const { PrismaClient } = require('@prisma/client');
+        const prisma = new PrismaClient();
+        const project = await prisma.project.findUnique({
+            where: { id: parseInt(id, 10) },
+            include: {
+                tasks: {
+                    include: {
+                        assignedTo: { select: { id: true, name: true, email: true, profile: { select: { profilePicture: true } } } },
+                        comments: {
+                            include: {
+                                user: { select: { id: true, name: true, email: true, profile: { select: { profilePicture: true } } } }
+                            },
+                            orderBy: { createdAt: 'desc' }
+                        }
+                    }
+                }
+            }
+        });
+        if (!project) {
+            res.status(404).json({ error: 'Project not found' });
+            return;
+        }
+        res.status(200).json(project);
+    }
+    catch (error) {
+        res.status(500).json({ error: 'Failed to fetch project' });
+    }
+};
+exports.getProjectById = getProjectById;
 const updateProject = async (req, res) => {
     var _a;
     try {
@@ -106,7 +138,7 @@ const updateProject = async (req, res) => {
         if (req.file) {
             image = `/uploads/${req.file.filename}`;
         }
-        if (((_a = req.user) === null || _a === void 0 ? void 0 : _a.role) !== 'admin') {
+        if (['employee', 'hr'].includes((_a = req.user) === null || _a === void 0 ? void 0 : _a.role)) {
             res.status(403).json({ error: 'Forbidden' });
             return;
         }
@@ -122,7 +154,7 @@ const deleteProject = async (req, res) => {
     var _a;
     try {
         const { id } = req.params;
-        if (((_a = req.user) === null || _a === void 0 ? void 0 : _a.role) !== 'admin') {
+        if (['employee', 'hr'].includes((_a = req.user) === null || _a === void 0 ? void 0 : _a.role)) {
             res.status(403).json({ error: 'Forbidden' });
             return;
         }
@@ -139,7 +171,7 @@ const addComment = async (req, res) => {
     try {
         const projectId = parseInt(req.params.id);
         const { comment } = req.body;
-        if (((_a = req.user) === null || _a === void 0 ? void 0 : _a.role) !== 'admin') {
+        if (['employee', 'hr'].includes((_a = req.user) === null || _a === void 0 ? void 0 : _a.role)) {
             res.status(403).json({ error: 'Forbidden' });
             return;
         }

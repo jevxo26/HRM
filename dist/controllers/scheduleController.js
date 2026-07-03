@@ -33,7 +33,7 @@ var __importStar = (this && this.__importStar) || (function () {
     };
 })();
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.getSchedules = exports.createSchedule = void 0;
+exports.deleteSchedule = exports.getSchedules = exports.createSchedule = void 0;
 const scheduleService = __importStar(require("../services/scheduleService"));
 const client_1 = require("@prisma/client");
 const prisma = new client_1.PrismaClient();
@@ -43,7 +43,7 @@ const createSchedule = async (req, res) => {
         // If not admin, force userId to be the logged in user
         let { userId, dayOfWeek, startTime, endTime } = req.body;
         if (((_a = req.user) === null || _a === void 0 ? void 0 : _a.role) !== 'admin') {
-            userId = (_b = req.user) === null || _b === void 0 ? void 0 : _b.id; // force to their own ID
+            userId = (_b = req.user) === null || _b === void 0 ? void 0 : _b.userId; // force to their own ID
         }
         if (!userId || !dayOfWeek || !startTime || !endTime) {
             res.status(400).json({ error: 'Missing required fields' });
@@ -62,7 +62,7 @@ const getSchedules = async (req, res) => {
     try {
         let teamId = null;
         if (((_a = req.user) === null || _a === void 0 ? void 0 : _a.role) === 'employee') {
-            const user = await prisma.user.findUnique({ where: { id: req.user.id }, include: { profile: true } });
+            const user = await prisma.user.findUnique({ where: { id: req.user.userId }, include: { profile: true } });
             teamId = ((_b = user === null || user === void 0 ? void 0 : user.profile) === null || _b === void 0 ? void 0 : _b.teamId) || null;
         }
         const schedules = await scheduleService.getSchedules(teamId);
@@ -73,3 +73,14 @@ const getSchedules = async (req, res) => {
     }
 };
 exports.getSchedules = getSchedules;
+const deleteSchedule = async (req, res) => {
+    try {
+        const { id } = req.params;
+        await scheduleService.deleteSchedule(Number(id));
+        res.status(200).json({ message: 'Schedule deleted' });
+    }
+    catch (error) {
+        res.status(400).json({ error: error.message });
+    }
+};
+exports.deleteSchedule = deleteSchedule;

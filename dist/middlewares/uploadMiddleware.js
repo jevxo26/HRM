@@ -6,11 +6,16 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.upload = void 0;
 const multer_1 = __importDefault(require("multer"));
 const path_1 = __importDefault(require("path"));
+const fs_1 = __importDefault(require("fs"));
 // Configure storage for multer
 const storage = multer_1.default.diskStorage({
     destination: (req, file, cb) => {
+        const uploadDir = path_1.default.join(process.cwd(), 'public', 'uploads');
+        if (!fs_1.default.existsSync(uploadDir)) {
+            fs_1.default.mkdirSync(uploadDir, { recursive: true });
+        }
         // Save files in the public/uploads directory so they can be statically served
-        cb(null, path_1.default.join(process.cwd(), 'public', 'uploads'));
+        cb(null, uploadDir);
     },
     filename: (req, file, cb) => {
         // Generate a unique filename: timestamp + random number + original extension

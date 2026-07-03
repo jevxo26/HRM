@@ -38,7 +38,7 @@ const attendanceService = __importStar(require("../services/attendanceService"))
 const checkIn = async (req, res) => {
     var _a;
     try {
-        const userId = (_a = req.user) === null || _a === void 0 ? void 0 : _a.id;
+        const userId = (_a = req.user) === null || _a === void 0 ? void 0 : _a.userId;
         if (!userId) {
             res.status(401).json({ error: 'Unauthorized' });
             return;
@@ -54,7 +54,7 @@ exports.checkIn = checkIn;
 const checkOut = async (req, res) => {
     var _a;
     try {
-        const userId = (_a = req.user) === null || _a === void 0 ? void 0 : _a.id;
+        const userId = (_a = req.user) === null || _a === void 0 ? void 0 : _a.userId;
         if (!userId) {
             res.status(401).json({ error: 'Unauthorized' });
             return;
@@ -70,15 +70,15 @@ exports.checkOut = checkOut;
 const getAttendances = async (req, res) => {
     var _a, _b;
     try {
-        const userId = (_a = req.user) === null || _a === void 0 ? void 0 : _a.id;
+        const userId = (_a = req.user) === null || _a === void 0 ? void 0 : _a.userId;
         const role = (_b = req.user) === null || _b === void 0 ? void 0 : _b.role;
         let attendances;
-        if (role === 'admin') {
-            // Admin sees all
+        if (role !== 'employee') {
+            // Non-employees see all
             attendances = await attendanceService.getAllAttendances();
         }
         else {
-            // Employee sees own
+            // Employees see own
             attendances = await attendanceService.getAllAttendances(userId);
         }
         res.status(200).json(attendances);
@@ -122,12 +122,7 @@ const manualUpdate = async (req, res) => {
 };
 exports.manualUpdate = manualUpdate;
 const manualDelete = async (req, res) => {
-    var _a;
     try {
-        if (((_a = req.user) === null || _a === void 0 ? void 0 : _a.role) !== 'admin') {
-            res.status(403).json({ error: 'Forbidden. Admin access required.' });
-            return;
-        }
         const { id } = req.params;
         await attendanceService.deleteAttendance(Number(id));
         res.status(200).json({ message: 'Attendance deleted' });

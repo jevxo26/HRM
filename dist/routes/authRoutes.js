@@ -10,7 +10,7 @@ router.post('/login', authController_1.AuthController.login);
 router.post('/forgot-password', authController_1.AuthController.forgotPassword);
 router.post('/reset-password', authController_1.AuthController.resetPassword);
 router.post('/refresh-token', authController_1.AuthController.refreshToken);
-router.post('/logout', authMiddleware_1.verifyToken, authController_1.AuthController.logout); // Optional: verifyToken ensures only logged in users can logout
+router.post('/logout', authController_1.AuthController.logout); // Optional: verifyToken ensures only logged in users can logout
 router.get('/me', authMiddleware_1.verifyToken, authController_1.AuthController.me);
 router.post('/social-login/google', socialAuthController_1.SocialAuthController.loginWithGoogle);
 router.post('/social-login/facebook', socialAuthController_1.SocialAuthController.loginWithFacebook);

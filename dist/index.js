@@ -22,10 +22,10 @@ const teamRoutes_1 = __importDefault(require("./routes/teamRoutes"));
 const leaveRoutes_1 = __importDefault(require("./routes/leaveRoutes"));
 const profileRoutes_1 = __importDefault(require("./routes/profileRoutes"));
 const prisma = new client_1.PrismaClient();
+const port = parseInt(process.env.PORT || '8080', 10);
 const dev = process.env.NODE_ENV !== 'production';
-const app = (0, next_1.default)({ dev });
+const app = (0, next_1.default)({ dev, port });
 const handle = app.getRequestHandler();
-const port = process.env.PORT || 8080;
 app.prepare().then(async () => {
     const server = (0, express_1.default)();
     // Middleware

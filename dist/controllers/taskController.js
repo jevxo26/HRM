@@ -33,21 +33,22 @@ var __importStar = (this && this.__importStar) || (function () {
     };
 })();
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.updateTaskStatus = exports.getTasks = exports.createTask = void 0;
+exports.updateTask = exports.updateTaskStatus = exports.getTasks = exports.createTask = void 0;
 const taskService = __importStar(require("../services/taskService"));
 const createTask = async (req, res) => {
     var _a;
     try {
-        const { projectId, title, description, userId } = req.body;
-        if (((_a = req.user) === null || _a === void 0 ? void 0 : _a.role) !== 'admin') {
-            res.status(403).json({ error: 'Forbidden. Admin access required.' });
+        const { projectId, title, description, userId, priority, dueDate } = req.body;
+        if (['employee', 'hr'].includes((_a = req.user) === null || _a === void 0 ? void 0 : _a.role)) {
+            res.status(403).json({ error: 'Forbidden. Access restricted.' });
             return;
         }
         if (!projectId || !title) {
             res.status(400).json({ error: 'Project ID and title are required' });
             return;
         }
-        const task = await taskService.createTask(projectId, title, description, userId);
+        const parsedDueDate = dueDate ? new Date(dueDate) : undefined;
+        const task = await taskService.createTask(projectId, title, description, userId, priority || 'medium', parsedDueDate);
         if (userId) {
             try {
                 const { PrismaClient } = require('@prisma/client');
@@ -81,7 +82,7 @@ const getTasks = async (req, res) => {
         const userId = (_a = req.user) === null || _a === void 0 ? void 0 : _a.id;
         const role = (_b = req.user) === null || _b === void 0 ? void 0 : _b.role;
         let tasks;
-        if (role === 'admin') {
+        if (!['employee', 'hr'].includes(role)) {
             tasks = await taskService.getTasks();
         }
         else {
@@ -113,3 +114,37 @@ const updateTaskStatus = async (req, res) => {
     }
 };
 exports.updateTaskStatus = updateTaskStatus;
+const updateTask = async (req, res) => {
+    var _a, _b;
+    try {
+        const taskId = parseInt(req.params.id);
+        const { title, description, status, projectId, userId, priority, dueDate } = req.body;
+        const currentUserId = (_a = req.user) === null || _a === void 0 ? void 0 : _a.id;
+        const role = (_b = req.user) === null || _b === void 0 ? void 0 : _b.role;
+        if (!currentUserId) {
+            res.status(401).json({ error: 'Unauthorized' });
+            return;
+        }
+        const data = {};
+        if (title !== undefined)
+            data.title = title;
+        if (description !== undefined)
+            data.description = description;
+        if (status !== undefined)
+            data.status = status;
+        if (projectId !== undefined)
+            data.projectId = projectId;
+        if (userId !== undefined)
+            data.userId = userId;
+        if (priority !== undefined)
+            data.priority = priority;
+        if (dueDate !== undefined)
+            data.dueDate = dueDate ? new Date(dueDate) : null;
+        const task = await taskService.updateTask(taskId, data, currentUserId, role);
+        res.status(200).json({ message: 'Task updated', task });
+    }
+    catch (error) {
+        res.status(400).json({ error: error.message });
+    }
+};
+exports.updateTask = updateTask;

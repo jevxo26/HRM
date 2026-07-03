@@ -54,7 +54,7 @@ class SocialAuthService {
         // Generate our app's JWT
         const secret = process.env.JWT_SECRET || 'fallback_secret';
         const expiresIn = process.env.JWT_EXPIRES_IN || '1d';
-        const token = jsonwebtoken_1.default.sign({ id: user.id, email: user.email, role: user.role }, secret, { expiresIn: expiresIn });
+        const token = jsonwebtoken_1.default.sign({ userId: user.id, email: user.email, role: user.role }, secret, { expiresIn: expiresIn });
         const { password } = user, userWithoutPassword = __rest(user, ["password"]);
         return {
             token,

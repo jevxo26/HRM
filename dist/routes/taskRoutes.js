@@ -2,10 +2,14 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 const express_1 = require("express");
 const taskController_1 = require("../controllers/taskController");
+const taskCommentController_1 = require("../controllers/taskCommentController");
 const authMiddleware_1 = require("../middlewares/authMiddleware");
 const router = (0, express_1.Router)();
 router.use(authMiddleware_1.verifyToken);
 router.post('/', taskController_1.createTask);
 router.get('/', taskController_1.getTasks);
 router.patch('/:id/status', taskController_1.updateTaskStatus);
+router.put('/:id', taskController_1.updateTask);
+router.post('/:id/comments', taskCommentController_1.createTaskComment);
+router.get('/:id/comments', taskCommentController_1.getTaskComments);
 exports.default = router;

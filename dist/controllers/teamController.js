@@ -36,11 +36,10 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.deleteTeam = exports.updateTeam = exports.assignUser = exports.getTeams = exports.createTeam = void 0;
 const teamService = __importStar(require("../services/teamService"));
 const createTeam = async (req, res) => {
-    var _a;
     try {
         const { name, description } = req.body;
-        if (((_a = req.user) === null || _a === void 0 ? void 0 : _a.role) !== 'admin') {
-            res.status(403).json({ error: 'Forbidden. Admin access required.' });
+        if (!req.user || (req.user.role !== 'admin' && req.user.role !== 'employee')) {
+            res.status(403).json({ error: 'Forbidden. Access required.' });
             return;
         }
         if (!name) {

@@ -80,23 +80,20 @@ const getProfileById = async (req, res) => {
 };
 exports.getProfileById = getProfileById;
 const updateProfile = async (req, res) => {
-    var _a, _b, _c;
+    var _a;
     try {
         let userId = (_a = req.user) === null || _a === void 0 ? void 0 : _a.userId;
-        const _d = req.body, { userId: targetUserId } = _d, profileData = __rest(_d, ["userId"]);
-        // If an admin is updating someone else's profile
-        if (targetUserId && ((_b = req.user) === null || _b === void 0 ? void 0 : _b.role) === 'admin') {
-            userId = targetUserId;
+        const _b = req.body, { userId: targetUserId } = _b, profileData = __rest(_b, ["userId"]);
+        const isAdminRole = req.user && ['admin', 'cto', 'ceo', 'founder', 'teamlead', 'hr'].includes(req.user.role);
+        // If an admin/management is updating someone else's profile
+        if (targetUserId && isAdminRole) {
+            userId = parseInt(targetUserId, 10);
         }
         if (!userId) {
             res.status(401).json({ error: 'Unauthorized' });
             return;
         }
-        // Admins can update any field, but employees shouldn't be able to update salary/employment info
-        // For simplicity, we just pass the data, but in a real app, restrict fields based on role
-        // Admins can update any field, but employees shouldn't be able to update salary/employment info
-        // For simplicity, we just pass the data, but in a real app, restrict fields based on role
-        if (((_c = req.user) === null || _c === void 0 ? void 0 : _c.role) !== 'admin') {
+        if (!isAdminRole) {
             // Remove restricted fields
             delete profileData.basicSalary;
             delete profileData.allowances;
@@ -106,6 +103,19 @@ const updateProfile = async (req, res) => {
             delete profileData.salaryGrade;
             delete profileData.designation; // added restriction for designation
         }
+        else {
+            // Convert numeric fields if present
+            if (profileData.basicSalary)
+                profileData.basicSalary = parseFloat(profileData.basicSalary);
+            if (profileData.allowances)
+                profileData.allowances = parseFloat(profileData.allowances);
+            if (profileData.grossSalary)
+                profileData.grossSalary = parseFloat(profileData.grossSalary);
+        }
+        if (profileData.teamId)
+            profileData.teamId = parseInt(profileData.teamId, 10);
+        if (profileData.reportingManager)
+            profileData.reportingManager = parseInt(profileData.reportingManager, 10);
         // Convert date strings to Date objects for Prisma
         const dateFields = ['dateOfBirth', 'joiningDate', 'confirmationDate'];
         for (const field of dateFields) {
