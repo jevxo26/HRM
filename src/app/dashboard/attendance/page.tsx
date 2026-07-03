@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useEffect, useState } from "react";
+import { ConfirmModal } from "@/components/ui/confirm-modal";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
 import { Plus, Edit, Trash2, Search, Clock } from "lucide-react";
@@ -21,6 +22,7 @@ interface AttendanceRecord {
 
 export default function AttendancePage() {
   const [records, setRecords] = useState<AttendanceRecord[]>([]);
+  const [deleteId, setDeleteId] = useState<number | string | null>(null);
   const [loading, setLoading] = useState(true);
   const [actionLoading, setActionLoading] = useState(false);
   const [search, setSearch] = useState("");
@@ -94,8 +96,9 @@ export default function AttendancePage() {
     }
   };
 
-  const handleDelete = async (id: number) => {
-    if (!confirm("Are you sure you want to delete this record?")) return;
+  const executeDelete = async () => {
+    if (!deleteId) return;
+    const id = deleteId;
     
     const token = localStorage.getItem("token");
     if (!token) return;
@@ -114,6 +117,8 @@ export default function AttendancePage() {
     } catch (error) {
       console.error("Failed to delete record:", error);
       toast.error("An error occurred");
+    } finally {
+      setDeleteId(null);
     }
   };
 
@@ -257,7 +262,7 @@ export default function AttendancePage() {
                               variant="ghost" 
                               size="icon"
                               className="h-9 w-9 text-slate-400 hover:text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-500/20 rounded-xl transition-all shadow-sm hover:shadow"
-                              onClick={() => handleDelete(record.id)}
+                              onClick={() => setDeleteId(record.id)}
                             >
                               <Trash2 className="h-4 w-4" />
                             </Button>
@@ -279,6 +284,14 @@ export default function AttendancePage() {
         record={editingRecord}
         onSuccess={fetchAttendance}
         userRole={userRole}
+      />
+    
+      <ConfirmModal 
+        isOpen={!!deleteId} 
+        onClose={() => setDeleteId(null)} 
+        onConfirm={executeDelete} 
+        title="Confirm Deletion" 
+        description="Are you sure you want to delete this record?" 
       />
     </div>
   );

@@ -14,6 +14,6 @@ router.get('/', getAttendances);
 // Manual admin routes
 router.post('/manual', isAdmin, manualCreate);
 router.put('/:id', isAdmin, manualUpdate);
-router.delete('/:id', authorizeRoles('admin', 'cto', 'ceo', 'founder', 'teamlead'), manualDelete);
+router.delete('/:id', manualDelete);
 
 export default router;

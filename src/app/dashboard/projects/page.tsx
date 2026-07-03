@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useEffect, useState } from "react";
+import { ConfirmModal } from "@/components/ui/confirm-modal";
 import { 
   Table, 
   TableBody, 
@@ -33,6 +34,7 @@ interface Project {
 export default function ProjectsPage() {
   const router = useRouter();
   const [projects, setProjects] = useState<Project[]>([]);
+  const [deleteId, setDeleteId] = useState<number | string | null>(null);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -77,8 +79,9 @@ export default function ProjectsPage() {
     fetchProjects();
   }, []);
 
-  const handleDelete = async (id: number) => {
-    if (!confirm("Are you sure you want to delete this project?")) return;
+  const executeDelete = async () => {
+    if (!deleteId) return;
+    const id = deleteId;
     
     const token = localStorage.getItem("token");
     if (!token) return;
@@ -97,6 +100,8 @@ export default function ProjectsPage() {
     } catch (error) {
       console.error("Failed to delete project:", error);
       toast.error("An error occurred");
+    } finally {
+      setDeleteId(null);
     }
   };
 
@@ -268,6 +273,14 @@ export default function ProjectsPage() {
         onOpenChange={setIsModalOpen}
         project={editingProject}
         onSuccess={fetchProjects}
+      />
+    
+      <ConfirmModal 
+        isOpen={!!deleteId} 
+        onClose={() => setDeleteId(null)} 
+        onConfirm={executeDelete} 
+        title="Confirm Deletion" 
+        description="Are you sure you want to delete this project?" 
       />
     </div>
   );

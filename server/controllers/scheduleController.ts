@@ -41,3 +41,13 @@ export const getSchedules = async (req: AuthRequest, res: Response): Promise<voi
     res.status(500).json({ error: 'Failed to fetch schedules' });
   }
 };
+
+export const deleteSchedule = async (req: AuthRequest, res: Response): Promise<void> => {
+  try {
+    const { id } = req.params;
+    await scheduleService.deleteSchedule(Number(id));
+    res.status(200).json({ message: 'Schedule deleted' });
+  } catch (error: any) {
+    res.status(400).json({ error: error.message });
+  }
+};
