@@ -38,9 +38,11 @@ export const updateProfile = async (req: AuthRequest, res: Response): Promise<vo
     let userId = req.user?.userId;
     const { userId: targetUserId, ...profileData } = req.body;
 
-    // If an admin is updating someone else's profile
-    if (targetUserId && req.user?.role === 'admin') {
-      userId = targetUserId;
+    const isAdminRole = req.user && ['admin', 'cto', 'ceo', 'founder', 'teamlead', 'hr'].includes(req.user.role);
+
+    // If an admin/management is updating someone else's profile
+    if (targetUserId && isAdminRole) {
+      userId = parseInt(targetUserId as string, 10);
     }
 
     if (!userId) {
@@ -48,11 +50,7 @@ export const updateProfile = async (req: AuthRequest, res: Response): Promise<vo
       return;
     }
 
-    // Admins can update any field, but employees shouldn't be able to update salary/employment info
-    // For simplicity, we just pass the data, but in a real app, restrict fields based on role
-    // Admins can update any field, but employees shouldn't be able to update salary/employment info
-    // For simplicity, we just pass the data, but in a real app, restrict fields based on role
-    if (req.user?.role !== 'admin') {
+    if (!isAdminRole) {
       // Remove restricted fields
       delete profileData.basicSalary;
       delete profileData.allowances;
@@ -61,7 +59,15 @@ export const updateProfile = async (req: AuthRequest, res: Response): Promise<vo
       delete profileData.employmentType;
       delete profileData.salaryGrade;
       delete profileData.designation; // added restriction for designation
+    } else {
+      // Convert numeric fields if present
+      if (profileData.basicSalary) profileData.basicSalary = parseFloat(profileData.basicSalary as string);
+      if (profileData.allowances) profileData.allowances = parseFloat(profileData.allowances as string);
+      if (profileData.grossSalary) profileData.grossSalary = parseFloat(profileData.grossSalary as string);
     }
+
+    if (profileData.teamId) profileData.teamId = parseInt(profileData.teamId as string, 10);
+    if (profileData.reportingManager) profileData.reportingManager = parseInt(profileData.reportingManager as string, 10);
 
     // Convert date strings to Date objects for Prisma
     const dateFields = ['dateOfBirth', 'joiningDate', 'confirmationDate'];

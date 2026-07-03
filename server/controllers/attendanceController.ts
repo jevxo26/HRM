@@ -93,8 +93,9 @@ export const manualUpdate = async (req: AuthRequest, res: Response): Promise<voi
 
 export const manualDelete = async (req: AuthRequest, res: Response): Promise<void> => {
   try {
-    if (req.user?.role !== 'admin') {
-      res.status(403).json({ error: 'Forbidden. Admin access required.' });
+    const allowedRoles = ['admin', 'cto', 'ceo', 'founder', 'teamlead'];
+    if (!req.user || !allowedRoles.includes(req.user.role)) {
+      res.status(403).json({ error: 'Forbidden. Sufficient access required.' });
       return;
     }
     const { id } = req.params;
