@@ -109,3 +109,21 @@ export const updateTask = async (req: AuthRequest, res: Response): Promise<void>
     res.status(400).json({ error: error.message });
   }
 };
+
+export const deleteTask = async (req: AuthRequest, res: Response): Promise<void> => {
+  try {
+    const taskId = parseInt(req.params.id as string);
+    const role = req.user?.role;
+
+    if (role === 'employee') {
+      res.status(403).json({ error: 'Forbidden. Employees cannot delete tasks.' });
+      return;
+    }
+
+    await taskService.deleteTask(taskId);
+    res.status(200).json({ message: 'Task deleted successfully' });
+  } catch (error: any) {
+    res.status(400).json({ error: error.message });
+  }
+};
+

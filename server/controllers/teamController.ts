@@ -69,8 +69,8 @@ export const deleteTeam = async (req: AuthRequest, res: Response): Promise<void>
   try {
     const id = parseInt(req.params.id as string, 10);
 
-    if (req.user?.role !== 'admin') {
-      res.status(403).json({ error: 'Forbidden. Admin access required.' });
+    if (req.user?.role === 'employee') {
+      res.status(403).json({ error: 'Forbidden. Employees cannot delete teams.' });
       return;
     }
 

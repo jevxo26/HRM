@@ -51,3 +51,9 @@ export const updateTask = async (id: number, data: any, userId: number, role: st
     data,
   });
 };
+
+export const deleteTask = async (id: number) => {
+  return await prisma.task.delete({
+    where: { id },
+  });
+};
