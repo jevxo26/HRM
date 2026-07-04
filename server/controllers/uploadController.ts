@@ -15,7 +15,7 @@ export class UploadController {
     // Construct the backend URL for the file
     // Assuming backend runs on a specific domain/port which is known by the frontend,
     // or we can generate a relative URL that the frontend appends to its backend base URL.
-    const fileUrl = `/uploads/${req.file.filename}`;
+    const fileUrl = `/api/upload/file/${req.file.filename}`;
     
     // If you need an absolute URL and you know the backend URL from env:
     // const backendUrl = process.env.BACKEND_URL || 'http://localhost:3000';
@@ -43,7 +43,7 @@ export class UploadController {
     }
 
     const fileData = req.files.map((file) => ({
-      url: `/uploads/${file.filename}`,
+      url: `/api/upload/file/${file.filename}`,
       filename: file.filename,
       mimetype: file.mimetype,
       size: file.size,

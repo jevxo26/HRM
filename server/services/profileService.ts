@@ -22,6 +22,12 @@ export const upsertProfile = async (userId: number, profileData: any) => {
       userId,
       ...profileData,
     },
+    include: {
+      team: true,
+      user: {
+        select: { id: true, name: true, email: true, role: true }
+      }
+    }
   });
 };
 
