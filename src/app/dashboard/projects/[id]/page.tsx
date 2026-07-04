@@ -30,7 +30,7 @@ export default function ProjectDetailsPage() {
     try {
       const token = localStorage.getItem('token');
       const [res, authRes] = await Promise.all([
-        axios.get(`http://localhost:8080/api/projects/${id}`, {
+        axios.get(`/api/projects/${id}`, {
           headers: { Authorization: `Bearer ${token}` }
         }),
         fetch("/api/auth/me", {
@@ -61,7 +61,7 @@ export default function ProjectDetailsPage() {
     setSubmitting(true);
     try {
       await axios.post(
-        `http://localhost:8080/api/tasks/${taskId}/comments`,
+        `/api/tasks/${taskId}/comments`,
         { content: text },
         { headers: { Authorization: `Bearer ${localStorage.getItem('token')}` } }
       );
@@ -96,7 +96,7 @@ export default function ProjectDetailsPage() {
             </CardHeader>
             <CardContent>
               {project.image && (
-                <img src={`http://localhost:8080${project.image}`} alt={project.name} className="w-full h-40 object-cover rounded-md mb-4" />
+                <img src={project.image.startsWith('http') ? project.image : project.image} alt={project.name} className="w-full h-40 object-cover rounded-md mb-4" />
               )}
               <p className="text-sm text-gray-500 mb-4">{project.description || 'No description provided.'}</p>
               <div className="flex justify-between items-center text-sm">
