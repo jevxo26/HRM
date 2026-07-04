@@ -12,6 +12,7 @@ interface Task {
   userId?: number;
   priority: string;
   dueDate: string;
+  assignedTo?: { id: number; name: string; email: string };
 }
 
 interface TaskDetailModalProps {
@@ -71,8 +72,8 @@ export function TaskDetailModal({ open, onOpenChange, task }: TaskDetailModalPro
             <div className="flex items-center gap-2 p-4 rounded-xl bg-slate-50/50 dark:bg-slate-800/30 border border-slate-100 dark:border-slate-700">
               <User className="h-5 w-5 text-slate-400" />
               <div>
-                <p className="text-sm text-slate-500">Assignee ID</p>
-                <p className="font-medium mt-1">{task.userId || 'Unassigned'}</p>
+                <p className="text-sm text-slate-500">Assignee</p>
+                <p className="font-medium mt-1">{task.assignedTo?.name || 'Unassigned'}</p>
               </div>
             </div>
           </div>
