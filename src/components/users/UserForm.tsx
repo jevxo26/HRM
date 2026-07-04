@@ -30,7 +30,7 @@ export function UserForm({ initialUser, initialProfile }: { initialUser?: any; i
       const res = await fetch("/api/team", { headers: { Authorization: `Bearer ${token}` } });
       if (res.ok) {
         const data = await res.json();
-        setTeams(data.data || []);
+        setTeams(Array.isArray(data) ? data : (data.data || []));
       }
     } catch (error) {
       console.error("Failed to fetch teams", error);
