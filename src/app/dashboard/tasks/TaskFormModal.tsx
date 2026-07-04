@@ -40,6 +40,7 @@ export function TaskFormModal({ open, onOpenChange, task, onSuccess }: TaskFormM
   const [loading, setLoading] = useState(false);
   const [projects, setProjects] = useState<Project[]>([]);
   const [users, setUsers] = useState<User[]>([]);
+  const [userRole, setUserRole] = useState<string>("");
   const [formData, setFormData] = useState({
     title: "",
     description: "",
@@ -55,6 +56,12 @@ export function TaskFormModal({ open, onOpenChange, task, onSuccess }: TaskFormM
       const fetchDeps = async () => {
         const token = localStorage.getItem("token");
         if (!token) return;
+        
+        try {
+          const payload = JSON.parse(atob(token.split('.')[1]));
+          setUserRole(payload.role || "");
+        } catch (e) {}
+
         try {
           const [projRes, userRes] = await Promise.all([
             fetch("/api/projects", { headers: { Authorization: `Bearer ${token}` } }),
@@ -143,6 +150,9 @@ export function TaskFormModal({ open, onOpenChange, task, onSuccess }: TaskFormM
     }
   };
 
+  const isEdit = !!task;
+  const isEmployeeEdit = isEdit && userRole === "employee";
+
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-[425px]">
@@ -154,23 +164,27 @@ export function TaskFormModal({ open, onOpenChange, task, onSuccess }: TaskFormM
             </DialogDescription>
           </DialogHeader>
           <div className="grid gap-4 py-4">
-            <div className="space-y-2">
-              <Label htmlFor="title">Title</Label>
-              <Input
-                id="title"
-                value={formData.title}
-                onChange={(e) => setFormData({ ...formData, title: e.target.value })}
-                required
-              />
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="description">Description</Label>
-              <Input
-                id="description"
-                value={formData.description}
-                onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-              />
-            </div>
+            {!isEmployeeEdit && (
+              <>
+                <div className="space-y-2">
+                  <Label htmlFor="title">Title</Label>
+                  <Input
+                    id="title"
+                    value={formData.title}
+                    onChange={(e) => setFormData({ ...formData, title: e.target.value })}
+                    required
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="description">Description</Label>
+                  <Input
+                    id="description"
+                    value={formData.description}
+                    onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+                  />
+                </div>
+              </>
+            )}
             <div className="space-y-2">
               <Label htmlFor="status">Status</Label>
               <Select
@@ -184,50 +198,54 @@ export function TaskFormModal({ open, onOpenChange, task, onSuccess }: TaskFormM
                 className="text-sm"
               />
             </div>
-            <div className="grid grid-cols-2 gap-4">
-              <div className="space-y-2">
-                <Label htmlFor="priority">Priority</Label>
-                <Select
-                  options={[
-                    { value: "low", label: "Low" },
-                    { value: "medium", label: "Medium" },
-                    { value: "high", label: "High" },
-                  ]}
-                  value={{ value: formData.priority, label: formData.priority.charAt(0).toUpperCase() + formData.priority.slice(1) }}
-                  onChange={(option) => setFormData({ ...formData, priority: option?.value || "medium" })}
-                  className="text-sm"
-                />
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="dueDate">Due Date & Time</Label>
-                <Input
-                  id="dueDate"
-                  type="datetime-local"
-                  value={formData.dueDate}
-                  onChange={(e) => setFormData({ ...formData, dueDate: e.target.value })}
-                />
-              </div>
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="projectId">Project</Label>
-              <Select
-                options={projects.map(p => ({ value: p.id.toString(), label: p.name }))}
-                value={formData.projectId ? { value: formData.projectId, label: projects.find(p => p.id.toString() === formData.projectId)?.name } : null}
-                onChange={(option) => setFormData({ ...formData, projectId: option?.value || "" })}
-                placeholder="Select a project"
-                className="text-sm"
-              />
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="userId">Assignee (Optional)</Label>
-              <Select
-                options={[{ value: "", label: "Unassigned" }, ...users.map(u => ({ value: u.id.toString(), label: u.name }))]}
-                value={formData.userId ? { value: formData.userId, label: users.find(u => u.id.toString() === formData.userId)?.name } : { value: "", label: "Unassigned" }}
-                onChange={(option) => setFormData({ ...formData, userId: option?.value || "" })}
-                placeholder="Select an assignee"
-                className="text-sm"
-              />
-            </div>
+            {!isEmployeeEdit && (
+              <>
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="priority">Priority</Label>
+                    <Select
+                      options={[
+                        { value: "low", label: "Low" },
+                        { value: "medium", label: "Medium" },
+                        { value: "high", label: "High" },
+                      ]}
+                      value={{ value: formData.priority, label: formData.priority.charAt(0).toUpperCase() + formData.priority.slice(1) }}
+                      onChange={(option) => setFormData({ ...formData, priority: option?.value || "medium" })}
+                      className="text-sm"
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="dueDate">Due Date & Time</Label>
+                    <Input
+                      id="dueDate"
+                      type="datetime-local"
+                      value={formData.dueDate}
+                      onChange={(e) => setFormData({ ...formData, dueDate: e.target.value })}
+                    />
+                  </div>
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="projectId">Project</Label>
+                  <Select
+                    options={projects.map(p => ({ value: p.id.toString(), label: p.name }))}
+                    value={formData.projectId ? { value: formData.projectId, label: projects.find(p => p.id.toString() === formData.projectId)?.name } : null}
+                    onChange={(option) => setFormData({ ...formData, projectId: option?.value || "" })}
+                    placeholder="Select a project"
+                    className="text-sm"
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="userId">Assignee (Optional)</Label>
+                  <Select
+                    options={[{ value: "", label: "Unassigned" }, ...users.map(u => ({ value: u.id.toString(), label: u.name }))]}
+                    value={formData.userId ? { value: formData.userId, label: users.find(u => u.id.toString() === formData.userId)?.name } : { value: "", label: "Unassigned" }}
+                    onChange={(option) => setFormData({ ...formData, userId: option?.value || "" })}
+                    placeholder="Select an assignee"
+                    className="text-sm"
+                  />
+                </div>
+              </>
+            )}
           </div>
           <DialogFooter>
             <Button type="button" variant="outline" onClick={() => onOpenChange(false)} disabled={loading}>
