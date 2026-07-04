@@ -6,7 +6,7 @@ export const createTeam = async (req: AuthRequest, res: Response): Promise<void>
   try {
     const { name, description } = req.body;
     
-    const allowedRoles = ['admin', 'CTO', 'CEO', 'Founder', 'Team Lead'];
+    const allowedRoles = ['admin', 'cto', 'ceo', 'founder', 'teamlead'];
     if (!req.user || !allowedRoles.includes(req.user.role)) {
       res.status(403).json({ error: 'Forbidden. Access required.' });
       return;
@@ -54,7 +54,7 @@ export const updateTeam = async (req: AuthRequest, res: Response): Promise<void>
     const id = parseInt(req.params.id as string, 10);
     const { name, description } = req.body;
 
-    const allowedRoles = ['admin', 'CTO', 'CEO', 'Founder', 'Team Lead'];
+    const allowedRoles = ['admin', 'cto', 'ceo', 'founder', 'teamlead'];
     if (!req.user || !allowedRoles.includes(req.user.role)) {
       res.status(403).json({ error: 'Forbidden. Admin access required.' });
       return;
@@ -71,7 +71,7 @@ export const deleteTeam = async (req: AuthRequest, res: Response): Promise<void>
   try {
     const id = parseInt(req.params.id as string, 10);
 
-    const allowedRoles = ['admin', 'CTO', 'CEO', 'Founder', 'Team Lead'];
+    const allowedRoles = ['admin', 'cto', 'ceo', 'founder', 'teamlead'];
     if (!req.user || !allowedRoles.includes(req.user.role)) {
       res.status(403).json({ error: 'Forbidden. Admin access required.' });
       return;
