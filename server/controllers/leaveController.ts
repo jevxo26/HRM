@@ -26,6 +26,27 @@ export class LeaveController {
     }
   }
 
+  async updateType(req: Request, res: Response): Promise<void> {
+    try {
+      const { id } = req.params;
+      const { name, description, defaultDays } = req.body;
+      const leaveType = await leaveService.updateLeaveType(Number(id), { name, description, defaultDays });
+      res.status(200).json({ success: true, message: 'Leave type updated', data: leaveType });
+    } catch (error: any) {
+      res.status(500).json({ success: false, message: error.message });
+    }
+  }
+
+  async deleteType(req: Request, res: Response): Promise<void> {
+    try {
+      const { id } = req.params;
+      await leaveService.deleteLeaveType(Number(id));
+      res.status(200).json({ success: true, message: 'Leave type deleted' });
+    } catch (error: any) {
+      res.status(500).json({ success: false, message: error.message });
+    }
+  }
+
   async applyLeave(req: Request, res: Response): Promise<void> {
     try {
       const userId = (req as any).user.userId;

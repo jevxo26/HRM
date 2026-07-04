@@ -11,6 +11,8 @@ router.get('/my-requests', verifyToken, leaveController.getMyLeaves);
 
 // Admin only routes
 router.post('/types', verifyToken, isNotEmployee, leaveController.createType);
+router.put('/types/:id', verifyToken, isNotEmployee, leaveController.updateType);
+router.delete('/types/:id', verifyToken, isNotEmployee, leaveController.deleteType);
 router.get('/all', verifyToken, authorizeRoles('cto', 'ceo', 'teamlead', 'hr', 'founder', 'admin'), leaveController.getAllLeaves);
 router.put('/:id/status', verifyToken, authorizeRoles('cto', 'ceo', 'teamlead', 'hr', 'founder', 'admin'), leaveController.approveRejectLeave);
 
