@@ -20,8 +20,9 @@ export const getProfileById = async (req: AuthRequest, res: Response): Promise<v
   try {
     const userId = parseInt(req.params.userId as string);
     
-    // Only admins or the user themselves can view the profile (or maybe managers)
-    if (req.user?.role !== 'admin' && req.user?.userId !== userId) {
+    // Only admins/management or the user themselves can view the profile
+    const allowedRoles = ['admin', 'cto', 'ceo', 'founder', 'teamlead', 'hr'];
+    if (!allowedRoles.includes(req.user?.role || '') && req.user?.userId !== userId) {
       res.status(403).json({ error: 'Forbidden' });
       return;
     }
