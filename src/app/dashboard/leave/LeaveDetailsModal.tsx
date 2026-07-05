@@ -30,7 +30,7 @@ export function LeaveDetailsModal({ open, onOpenChange, leave }: LeaveDetailsMod
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-[425px]">
+      <DialogContent className="sm:max-w-[90vw] w-full">
         <DialogHeader>
           <DialogTitle>Leave Request Details</DialogTitle>
           <DialogDescription>

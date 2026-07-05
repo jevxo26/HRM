@@ -33,7 +33,7 @@ export function TaskDetailModal({ open, onOpenChange, task }: TaskDetailModalPro
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-[600px] overflow-hidden rounded-[2rem] p-0 border-0 shadow-2xl bg-white/40 dark:bg-slate-900/40 backdrop-blur-2xl ring-1 ring-white/60 dark:ring-slate-800/60">
+      <DialogContent className="sm:max-w-[90vw] w-full overflow-hidden rounded-[2rem] p-0 border-0 shadow-2xl bg-white/40 dark:bg-slate-900/40 backdrop-blur-2xl ring-1 ring-white/60 dark:ring-slate-800/60">
         <DialogHeader className="px-8 pt-8 pb-6 bg-white/20 dark:bg-slate-900/20 border-b border-slate-200/40 dark:border-slate-800/60">
           <DialogTitle className="text-2xl font-bold bg-gradient-to-r from-indigo-600 via-purple-600 to-indigo-600 bg-clip-text text-transparent flex items-center gap-3">
             <LayoutList className="h-6 w-6 text-indigo-600 dark:text-indigo-400" />

@@ -127,7 +127,7 @@ export function ScheduleFormModal({ open, onOpenChange, schedule, onSuccess, use
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-[425px]">
+      <DialogContent className="sm:max-w-[90vw] w-full">
         <form onSubmit={handleSubmit}>
           <DialogHeader>
             <DialogTitle>{schedule ? "Edit Schedule" : "Add Schedule"}</DialogTitle>

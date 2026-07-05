@@ -79,7 +79,7 @@ export function TeamFormModal({ open, onOpenChange, team, onSuccess }: TeamFormM
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-[425px]">
+      <DialogContent className="sm:max-w-[90vw] w-full">
         <form onSubmit={handleSubmit}>
           <DialogHeader>
             <DialogTitle>{team ? "Edit Team" : "Add Team"}</DialogTitle>

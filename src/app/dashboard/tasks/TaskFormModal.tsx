@@ -159,7 +159,7 @@ export function TaskFormModal({ open, onOpenChange, task, onSuccess }: TaskFormM
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-[425px]">
+      <DialogContent className="sm:max-w-[90vw] w-full">
         <form onSubmit={handleSubmit}>
           <DialogHeader>
             <DialogTitle>{task ? "Edit Task" : "Add Task"}</DialogTitle>
