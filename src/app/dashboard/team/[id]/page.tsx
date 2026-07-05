@@ -42,7 +42,7 @@ export default function TeamDetailPage() {
     const fetchTeam = async () => {
       try {
         const token = localStorage.getItem("token");
-        const res = await fetch(`/api/teams/${params.id}`, {
+        const res = await fetch(`/api/team/${params.id}`, {
           headers: { Authorization: `Bearer ${token}` }
         });
         if (!res.ok) throw new Error("Failed to fetch team details");
@@ -71,7 +71,7 @@ export default function TeamDetailPage() {
     setIsSending(true);
     try {
       const token = localStorage.getItem("token");
-      const res = await fetch(`/api/teams/${team.id}/bulk-email`, {
+      const res = await fetch(`/api/team/${team.id}/bulk-email`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
