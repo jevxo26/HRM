@@ -134,17 +134,15 @@ export default function SchedulePage() {
     <div className="space-y-6">
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <h1 className="text-3xl font-bold tracking-tight">Schedule</h1>
-        {userRole !== "employee" && (
-          <Button 
-            className="bg-indigo-600 hover:bg-indigo-700 text-white"
-            onClick={() => {
-              setEditingSchedule(null);
-              setIsModalOpen(true);
-            }}
-          >
-            <Plus className="mr-2 h-4 w-4" /> Add Event
-          </Button>
-        )}
+        <Button 
+          className="bg-indigo-600 hover:bg-indigo-700 text-white"
+          onClick={() => {
+            setEditingSchedule(null);
+            setIsModalOpen(true);
+          }}
+        >
+          <Plus className="mr-2 h-4 w-4" /> Add Event
+        </Button>
       </div>
 
       <Tabs defaultValue="my-schedule" className="space-y-6">
