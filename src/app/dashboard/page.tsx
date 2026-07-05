@@ -148,7 +148,7 @@ export default function DashboardPage() {
 
     const itemVariants = {
         hidden: { opacity: 0, y: 20 },
-        show: { opacity: 1, y: 0, transition: { type: "spring", stiffness: 300, damping: 24 } }
+        show: { opacity: 1, y: 0, transition: { type: "spring" as const, stiffness: 300, damping: 24 } }
     };
 
     return (
@@ -514,7 +514,7 @@ export default function DashboardPage() {
                                         <div className={celebrations.birthdays.length > 0 ? "pt-2" : ""}>
                                             <h3 className="text-xs font-bold text-slate-400 uppercase tracking-widest mb-3">New Joiners</h3>
                                             <div className="space-y-2">
-                                                {celebrations.newJoiners.map((nj: any) => (
+                                                {celebrations.newJoiners.slice(0, 2).map((nj: any) => (
                                                     <div key={nj.id} className="flex items-center gap-3 p-2.5 bg-indigo-50/50 rounded-xl border border-indigo-100/50">
                                                         <div className="w-10 h-10 rounded-full overflow-hidden bg-white border border-indigo-100">
                                                             {nj.profilePicture ? (
