@@ -66,8 +66,9 @@ const getProfileById = async (req, res) => {
     var _a, _b;
     try {
         const userId = parseInt(req.params.userId);
-        // Only admins or the user themselves can view the profile (or maybe managers)
-        if (((_a = req.user) === null || _a === void 0 ? void 0 : _a.role) !== 'admin' && ((_b = req.user) === null || _b === void 0 ? void 0 : _b.userId) !== userId) {
+        // Only admins/management or the user themselves can view the profile
+        const allowedRoles = ['admin', 'cto', 'ceo', 'founder', 'teamlead', 'hr'];
+        if (!allowedRoles.includes(((_a = req.user) === null || _a === void 0 ? void 0 : _a.role) || '') && ((_b = req.user) === null || _b === void 0 ? void 0 : _b.userId) !== userId) {
             res.status(403).json({ error: 'Forbidden' });
             return;
         }

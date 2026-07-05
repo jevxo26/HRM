@@ -42,10 +42,52 @@ export const getSchedules = async (req: AuthRequest, res: Response): Promise<voi
   }
 };
 
+export const updateSchedule = async (req: AuthRequest, res: Response): Promise<void> => {
+  try {
+    const { id } = req.params;
+    const { dayOfWeek, startTime, endTime } = req.body;
+    const scheduleId = Number(id);
+
+    const existingSchedule = await scheduleService.getScheduleById(scheduleId);
+    if (!existingSchedule) {
+      res.status(404).json({ error: 'Schedule not found' });
+      return;
+    }
+
+    if (req.user?.role !== 'admin' && existingSchedule.userId !== req.user?.userId) {
+      res.status(403).json({ error: 'Not authorized to update this schedule' });
+      return;
+    }
+
+    if (!dayOfWeek || !startTime || !endTime) {
+      res.status(400).json({ error: 'Missing required fields' });
+      return;
+    }
+
+    const updatedSchedule = await scheduleService.updateSchedule(scheduleId, dayOfWeek, startTime, endTime);
+    res.status(200).json({ message: 'Schedule updated', schedule: updatedSchedule });
+  } catch (error: any) {
+    res.status(400).json({ error: error.message });
+  }
+};
+
 export const deleteSchedule = async (req: AuthRequest, res: Response): Promise<void> => {
   try {
     const { id } = req.params;
-    await scheduleService.deleteSchedule(Number(id));
+    const scheduleId = Number(id);
+
+    const existingSchedule = await scheduleService.getScheduleById(scheduleId);
+    if (!existingSchedule) {
+      res.status(404).json({ error: 'Schedule not found' });
+      return;
+    }
+
+    if (req.user?.role !== 'admin' && existingSchedule.userId !== req.user?.userId) {
+      res.status(403).json({ error: 'Not authorized to delete this schedule' });
+      return;
+    }
+
+    await scheduleService.deleteSchedule(scheduleId);
     res.status(200).json({ message: 'Schedule deleted' });
   } catch (error: any) {
     res.status(400).json({ error: error.message });

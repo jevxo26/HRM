@@ -20,6 +20,12 @@ const upsertProfile = async (userId, profileData) => {
         where: { userId },
         update: profileData,
         create: Object.assign({ userId }, profileData),
+        include: {
+            team: true,
+            user: {
+                select: { id: true, name: true, email: true, role: true }
+            }
+        }
     });
 };
 exports.upsertProfile = upsertProfile;

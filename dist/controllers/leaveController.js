@@ -26,6 +26,27 @@ class LeaveController {
             res.status(500).json({ success: false, message: error.message });
         }
     }
+    async updateType(req, res) {
+        try {
+            const { id } = req.params;
+            const { name, description, defaultDays } = req.body;
+            const leaveType = await leaveService_1.leaveService.updateLeaveType(Number(id), { name, description, defaultDays });
+            res.status(200).json({ success: true, message: 'Leave type updated', data: leaveType });
+        }
+        catch (error) {
+            res.status(500).json({ success: false, message: error.message });
+        }
+    }
+    async deleteType(req, res) {
+        try {
+            const { id } = req.params;
+            await leaveService_1.leaveService.deleteLeaveType(Number(id));
+            res.status(200).json({ success: true, message: 'Leave type deleted' });
+        }
+        catch (error) {
+            res.status(500).json({ success: false, message: error.message });
+        }
+    }
     async applyLeave(req, res) {
         try {
             const userId = req.user.userId;
@@ -132,6 +153,16 @@ class LeaveController {
                 console.error('Error sending leave email:', emailErr);
             }
             res.status(200).json({ success: true, message: `Leave request ${status}`, data: updatedLeave });
+        }
+        catch (error) {
+            res.status(500).json({ success: false, message: error.message });
+        }
+    }
+    async deleteLeave(req, res) {
+        try {
+            const { id } = req.params;
+            await leaveService_1.leaveService.deleteLeaveRequest(Number(id));
+            res.status(200).json({ success: true, message: 'Leave request deleted' });
         }
         catch (error) {
             res.status(500).json({ success: false, message: error.message });

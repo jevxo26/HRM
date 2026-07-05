@@ -31,6 +31,19 @@ export const getSchedules = async (teamId?: number | null) => {
   });
 };
 
+export const getScheduleById = async (id: number) => {
+  return await prisma.schedule.findUnique({
+    where: { id },
+  });
+};
+
+export const updateSchedule = async (id: number, dayOfWeek: string, startTime: string, endTime: string) => {
+  return await prisma.schedule.update({
+    where: { id },
+    data: { dayOfWeek, startTime, endTime },
+  });
+};
+
 export const deleteSchedule = async (id: number) => {
   return await prisma.schedule.delete({
     where: { id },

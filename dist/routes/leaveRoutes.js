@@ -10,6 +10,9 @@ router.post('/apply', authMiddleware_1.verifyToken, leaveController_1.leaveContr
 router.get('/my-requests', authMiddleware_1.verifyToken, leaveController_1.leaveController.getMyLeaves);
 // Admin only routes
 router.post('/types', authMiddleware_1.verifyToken, authMiddleware_1.isNotEmployee, leaveController_1.leaveController.createType);
+router.put('/types/:id', authMiddleware_1.verifyToken, authMiddleware_1.isNotEmployee, leaveController_1.leaveController.updateType);
+router.delete('/types/:id', authMiddleware_1.verifyToken, authMiddleware_1.isNotEmployee, leaveController_1.leaveController.deleteType);
 router.get('/all', authMiddleware_1.verifyToken, (0, authMiddleware_1.authorizeRoles)('cto', 'ceo', 'teamlead', 'hr', 'founder', 'admin'), leaveController_1.leaveController.getAllLeaves);
 router.put('/:id/status', authMiddleware_1.verifyToken, (0, authMiddleware_1.authorizeRoles)('cto', 'ceo', 'teamlead', 'hr', 'founder', 'admin'), leaveController_1.leaveController.approveRejectLeave);
+router.delete('/:id', authMiddleware_1.verifyToken, (0, authMiddleware_1.authorizeRoles)('cto', 'ceo', 'teamlead', 'hr', 'founder', 'admin'), leaveController_1.leaveController.deleteLeave);
 exports.default = router;

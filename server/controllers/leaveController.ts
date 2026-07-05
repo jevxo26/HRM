@@ -177,6 +177,16 @@ export class LeaveController {
       res.status(500).json({ success: false, message: error.message });
     }
   }
+
+  async deleteLeave(req: Request, res: Response): Promise<void> {
+    try {
+      const { id } = req.params;
+      await leaveService.deleteLeaveRequest(Number(id));
+      res.status(200).json({ success: true, message: 'Leave request deleted' });
+    } catch (error: any) {
+      res.status(500).json({ success: false, message: error.message });
+    }
+  }
 }
 
 export const leaveController = new LeaveController();

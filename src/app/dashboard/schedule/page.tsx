@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Plus, MoreHorizontal, Edit, Trash2, Search, Calendar, Coffee, Zap, Sun, Cloud, Star, CloudRain, Moon, User } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ScheduleFormModal } from "./ScheduleFormModal";
 import { toast } from "sonner";
 
@@ -27,6 +28,17 @@ export default function SchedulePage() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingSchedule, setEditingSchedule] = useState<Schedule | null>(null);
   const [userRole, setUserRole] = useState<string>("employee");
+  const [userId, setUserId] = useState<number | null>(null);
+
+  const formatAMPM = (timeStr: string) => {
+    if (!timeStr) return "";
+    const [hours, minutes] = timeStr.split(':');
+    let h = parseInt(hours, 10);
+    const ampm = h >= 12 ? 'PM' : 'AM';
+    h = h % 12;
+    h = h ? h : 12;
+    return `${h.toString().padStart(2, '0')}:${minutes} ${ampm}`;
+  };
 
   const fetchSchedules = async () => {
     setLoading(true);
@@ -42,6 +54,7 @@ export default function SchedulePage() {
       if (authRes.ok) {
         const authData = await authRes.json();
         setUserRole(authData.data?.role || authData.role || 'employee');
+        setUserId(authData.data?.id || authData.userId || null);
       }
 
       if (res.ok) {
@@ -134,7 +147,100 @@ export default function SchedulePage() {
         )}
       </div>
 
-      <Card className="border-0 shadow-2xl bg-[#0F0F12] overflow-hidden rounded-[2rem] border border-white/5">
+      <Tabs defaultValue="my-schedule" className="space-y-6">
+        <TabsList className="bg-[#0F0F12] border border-white/5 p-1 rounded-xl">
+          <TabsTrigger value="my-schedule" className="rounded-lg data-[state=active]:bg-indigo-500/20 data-[state=active]:text-indigo-400">My Schedule</TabsTrigger>
+          <TabsTrigger value="team-schedule" className="rounded-lg data-[state=active]:bg-indigo-500/20 data-[state=active]:text-indigo-400">Team Schedule</TabsTrigger>
+        </TabsList>
+
+        <TabsContent value="my-schedule">
+          <Card className="border-0 shadow-2xl bg-[#0F0F12] overflow-hidden rounded-[2rem] border border-white/5">
+            <CardHeader className="px-8 pb-6 pt-8 border-b border-white/5 bg-[#0F0F12]">
+              <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+                <div>
+                  <CardTitle className="text-2xl font-bold text-white flex items-center gap-3">
+                    <div className="p-2.5 bg-indigo-500/20 rounded-xl">
+                      <User className="h-6 w-6 text-indigo-400" />
+                    </div>
+                    My Schedule
+                  </CardTitle>
+                  <p className="text-slate-400 mt-2 text-sm ml-14">Manage your personal weekly schedule</p>
+                </div>
+              </div>
+            </CardHeader>
+            <CardContent className="p-0 bg-[#0F0F12]">
+              <div className="w-full overflow-x-auto p-6">
+                <div className="min-w-[800px] border border-white/10 rounded-2xl overflow-hidden bg-[#16161A] pb-1">
+                  <div className="grid grid-cols-8 border-b border-white/10 text-slate-400">
+                    <div className="px-6 py-4 flex items-center gap-2 border-r border-white/10 col-span-2">
+                      <Calendar className="h-4 w-4 text-indigo-400" />
+                      <span className="font-semibold text-white text-sm">Day</span>
+                    </div>
+                    <div className="px-6 py-4 flex items-center gap-2 border-r border-white/10 col-span-4">
+                      <span className="font-semibold text-white text-sm">Time</span>
+                    </div>
+                    <div className="px-6 py-4 flex items-center gap-2 border-white/10 col-span-2 justify-end">
+                      <span className="font-semibold text-white text-sm">Actions</span>
+                    </div>
+                  </div>
+                  
+                  {loading ? (
+                    <div className="flex justify-center items-center h-48">
+                      <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-indigo-500"></div>
+                    </div>
+                  ) : filteredSchedules.filter(s => s.userId === userId).length === 0 ? (
+                    <div className="flex flex-col items-center justify-center gap-2 h-48 text-slate-400">
+                      You haven't scheduled any days yet.
+                    </div>
+                  ) : (
+                    <div className="divide-y divide-white/5">
+                      {daysOfWeek.map((day) => {
+                        const mySched = filteredSchedules.find(s => s.userId === userId && s.dayOfWeek === day.name);
+                        if (!mySched) return null;
+                        
+                        return (
+                          <div key={day.name} className="grid grid-cols-8 hover:bg-white/5 transition-colors duration-200">
+                            <div className="px-6 py-4 flex items-center gap-3 border-r border-white/5 col-span-2">
+                              <day.icon className="h-5 w-5 text-indigo-400" />
+                              <span className="font-semibold text-slate-200">{day.name}</span>
+                            </div>
+                            <div className="px-6 py-4 flex flex-row items-center border-r border-white/5 col-span-4 gap-4">
+                              <span className="text-sm font-semibold text-emerald-400">{formatAMPM(mySched.startTime)}</span>
+                              <span className="text-slate-500">-</span>
+                              <span className="text-sm font-semibold text-rose-400">{formatAMPM(mySched.endTime)}</span>
+                            </div>
+                            <div className="px-6 py-4 flex items-center justify-end gap-2 col-span-2">
+                              <Button 
+                                variant="ghost" size="icon"
+                                className="h-8 w-8 text-slate-400 hover:text-indigo-400 hover:bg-indigo-500/20"
+                                onClick={() => {
+                                  setEditingSchedule(mySched);
+                                  setIsModalOpen(true);
+                                }}
+                              >
+                                <Edit className="h-4 w-4" />
+                              </Button>
+                              <Button 
+                                variant="ghost" size="icon"
+                                className="h-8 w-8 text-slate-400 hover:text-rose-400 hover:bg-rose-500/20"
+                                onClick={() => setDeleteId(mySched.id)}
+                              >
+                                <Trash2 className="h-4 w-4" />
+                              </Button>
+                            </div>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  )}
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        <TabsContent value="team-schedule">
+          <Card className="border-0 shadow-2xl bg-[#0F0F12] overflow-hidden rounded-[2rem] border border-white/5">
         <CardHeader className="px-8 pb-6 pt-8 border-b border-white/5 bg-[#0F0F12]">
           <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
             <div>
@@ -221,9 +327,9 @@ export default function SchedulePage() {
                           >
                             {scheduleForDay ? (
                               <div className="flex flex-col items-center text-center">
-                                <span className="text-xs font-semibold text-emerald-400">{scheduleForDay.startTime}</span>
-                                <span className="text-[10px] text-slate-500">-</span>
-                                <span className="text-xs font-semibold text-rose-400">{scheduleForDay.endTime}</span>
+                                <span className="text-[11px] font-semibold text-emerald-400 whitespace-nowrap">{formatAMPM(scheduleForDay.startTime)}</span>
+                                <span className="text-[10px] text-slate-500 my-0.5">-</span>
+                                <span className="text-[11px] font-semibold text-rose-400 whitespace-nowrap">{formatAMPM(scheduleForDay.endTime)}</span>
                               </div>
                             ) : (
                               <span className="text-slate-700 text-xl font-light">-</span>
@@ -239,6 +345,8 @@ export default function SchedulePage() {
           </div>
         </CardContent>
       </Card>
+      </TabsContent>
+      </Tabs>
 
       <ScheduleFormModal 
         open={isModalOpen}

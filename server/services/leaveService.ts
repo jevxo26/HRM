@@ -60,6 +60,12 @@ export class LeaveService {
       data: { status }
     });
   }
+
+  async deleteLeaveRequest(id: number) {
+    return await prisma.leaveRequest.delete({
+      where: { id }
+    });
+  }
 }
 
 export const leaveService = new LeaveService();

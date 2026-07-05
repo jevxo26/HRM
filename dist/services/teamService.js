@@ -1,6 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.assignUserToTeam = exports.deleteTeam = exports.updateTeam = exports.getTeams = exports.createTeam = void 0;
+exports.assignUserToTeam = exports.deleteTeam = exports.updateTeam = exports.getTeamById = exports.getTeams = exports.createTeam = void 0;
 const client_1 = require("@prisma/client");
 const prisma = new client_1.PrismaClient();
 const createTeam = async (name, description) => {
@@ -27,6 +27,21 @@ const getTeams = async () => {
     });
 };
 exports.getTeams = getTeams;
+const getTeamById = async (id) => {
+    return await prisma.team.findUnique({
+        where: { id },
+        include: {
+            profiles: {
+                include: {
+                    user: {
+                        select: { id: true, name: true, email: true, role: true }
+                    }
+                }
+            }
+        }
+    });
+};
+exports.getTeamById = getTeamById;
 const updateTeam = async (id, name, description) => {
     return await prisma.team.update({
         where: { id },

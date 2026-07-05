@@ -54,7 +54,7 @@ export default function ProjectsPage() {
 
       if (authRes.ok) {
         const authData = await authRes.json();
-        setUserRole(authData.role);
+        setUserRole(authData.data?.role || authData.role || 'employee');
       }
 
       if (projRes.ok) {

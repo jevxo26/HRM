@@ -47,7 +47,7 @@ export default function AttendancePage() {
 
       if (authRes.ok) {
         const authData = await authRes.json();
-        setUserRole(authData.role);
+        setUserRole(authData.data?.role || authData.role || 'employee');
       }
 
       if (attRes.ok) {

@@ -26,6 +26,21 @@ export const getTeams = async () => {
   });
 };
 
+export const getTeamById = async (id: number) => {
+  return await prisma.team.findUnique({
+    where: { id },
+    include: { 
+      profiles: {
+        include: {
+          user: {
+            select: { id: true, name: true, email: true, role: true }
+          }
+        }
+      }
+    }
+  });
+};
+
 export const updateTeam = async (id: number, name: string, description?: string) => {
   return await prisma.team.update({
     where: { id },

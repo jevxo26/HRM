@@ -1,6 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.deleteSchedule = exports.getSchedules = exports.createSchedule = void 0;
+exports.deleteSchedule = exports.updateSchedule = exports.getScheduleById = exports.getSchedules = exports.createSchedule = void 0;
 const client_1 = require("@prisma/client");
 const prisma = new client_1.PrismaClient();
 const createSchedule = async (userId, dayOfWeek, startTime, endTime) => {
@@ -32,6 +32,19 @@ const getSchedules = async (teamId) => {
     });
 };
 exports.getSchedules = getSchedules;
+const getScheduleById = async (id) => {
+    return await prisma.schedule.findUnique({
+        where: { id },
+    });
+};
+exports.getScheduleById = getScheduleById;
+const updateSchedule = async (id, dayOfWeek, startTime, endTime) => {
+    return await prisma.schedule.update({
+        where: { id },
+        data: { dayOfWeek, startTime, endTime },
+    });
+};
+exports.updateSchedule = updateSchedule;
 const deleteSchedule = async (id) => {
     return await prisma.schedule.delete({
         where: { id },

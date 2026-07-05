@@ -33,7 +33,7 @@ var __importStar = (this && this.__importStar) || (function () {
     };
 })();
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.updateTask = exports.updateTaskStatus = exports.getTasks = exports.createTask = void 0;
+exports.deleteTask = exports.updateTask = exports.updateTaskStatus = exports.getTasks = exports.createTask = void 0;
 const taskService = __importStar(require("../services/taskService"));
 const createTask = async (req, res) => {
     var _a;
@@ -148,3 +148,20 @@ const updateTask = async (req, res) => {
     }
 };
 exports.updateTask = updateTask;
+const deleteTask = async (req, res) => {
+    var _a;
+    try {
+        const taskId = parseInt(req.params.id);
+        const role = (_a = req.user) === null || _a === void 0 ? void 0 : _a.role;
+        if (role === 'employee') {
+            res.status(403).json({ error: 'Forbidden. Employees cannot delete tasks.' });
+            return;
+        }
+        await taskService.deleteTask(taskId);
+        res.status(200).json({ message: 'Task deleted successfully' });
+    }
+    catch (error) {
+        res.status(400).json({ error: error.message });
+    }
+};
+exports.deleteTask = deleteTask;

@@ -12,6 +12,17 @@ class LeaveService {
     async getLeaveTypes() {
         return await prisma.leaveType.findMany();
     }
+    async updateLeaveType(id, data) {
+        return await prisma.leaveType.update({
+            where: { id },
+            data
+        });
+    }
+    async deleteLeaveType(id) {
+        return await prisma.leaveType.delete({
+            where: { id }
+        });
+    }
     async applyForLeave(userId, data) {
         return await prisma.leaveRequest.create({
             data: {
@@ -41,6 +52,11 @@ class LeaveService {
         return await prisma.leaveRequest.update({
             where: { id },
             data: { status }
+        });
+    }
+    async deleteLeaveRequest(id) {
+        return await prisma.leaveRequest.delete({
+            where: { id }
         });
     }
 }

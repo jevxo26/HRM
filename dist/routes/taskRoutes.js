@@ -10,6 +10,7 @@ router.post('/', taskController_1.createTask);
 router.get('/', taskController_1.getTasks);
 router.patch('/:id/status', taskController_1.updateTaskStatus);
 router.put('/:id', taskController_1.updateTask);
+router.delete('/:id', taskController_1.deleteTask);
 router.post('/:id/comments', taskCommentController_1.createTaskComment);
 router.get('/:id/comments', taskCommentController_1.getTaskComments);
 exports.default = router;

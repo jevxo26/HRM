@@ -15,5 +15,6 @@ router.put('/types/:id', verifyToken, isNotEmployee, leaveController.updateType)
 router.delete('/types/:id', verifyToken, isNotEmployee, leaveController.deleteType);
 router.get('/all', verifyToken, authorizeRoles('cto', 'ceo', 'teamlead', 'hr', 'founder', 'admin'), leaveController.getAllLeaves);
 router.put('/:id/status', verifyToken, authorizeRoles('cto', 'ceo', 'teamlead', 'hr', 'founder', 'admin'), leaveController.approveRejectLeave);
+router.delete('/:id', verifyToken, authorizeRoles('cto', 'ceo', 'teamlead', 'hr', 'founder', 'admin'), leaveController.deleteLeave);
 
 export default router;

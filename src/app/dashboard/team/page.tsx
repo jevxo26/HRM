@@ -9,6 +9,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { TeamFormModal } from "./TeamFormModal";
 import { toast } from "sonner";
+import Link from "next/link";
 
 interface Team {
   id: number;
@@ -26,11 +27,11 @@ interface Team {
 
 export default function TeamPage() {
   const [teams, setTeams] = useState<Team[]>([]);
-  const [deleteId, setDeleteId] = useState<number | string | null>(null);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingTeam, setEditingTeam] = useState<Team | null>(null);
+  const [deleteId, setDeleteId] = useState<number | string | null>(null);
 
   const fetchTeam = async () => {
     setLoading(true);
@@ -201,6 +202,12 @@ export default function TeamPage() {
                       </TableCell>
                       <TableCell className="text-right px-8 py-5">
                         <div className="flex items-center justify-end gap-2 opacity-0 group-hover:opacity-100 transition-all duration-300 translate-x-2 group-hover:translate-x-0">
+                          <Link 
+                            href={`/dashboard/team/${team.id}`}
+                            className="inline-flex items-center justify-center h-9 w-9 text-slate-400 hover:text-indigo-600 hover:bg-indigo-50 dark:hover:bg-indigo-500/20 rounded-xl transition-all shadow-sm hover:shadow"
+                          >
+                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-eye"><path d="M2.062 12.348a1 1 0 0 1 0-.696 10.75 10.75 0 0 1 19.876 0 1 1 0 0 1 0 .696 10.75 10.75 0 0 1-19.876 0"/><circle cx="12" cy="12" r="3"/></svg>
+                          </Link>
                           <Button 
                             variant="ghost" 
                             size="icon"

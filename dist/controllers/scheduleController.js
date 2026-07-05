@@ -33,7 +33,7 @@ var __importStar = (this && this.__importStar) || (function () {
     };
 })();
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.deleteSchedule = exports.getSchedules = exports.createSchedule = void 0;
+exports.deleteSchedule = exports.updateSchedule = exports.getSchedules = exports.createSchedule = void 0;
 const scheduleService = __importStar(require("../services/scheduleService"));
 const client_1 = require("@prisma/client");
 const prisma = new client_1.PrismaClient();
@@ -73,10 +73,48 @@ const getSchedules = async (req, res) => {
     }
 };
 exports.getSchedules = getSchedules;
-const deleteSchedule = async (req, res) => {
+const updateSchedule = async (req, res) => {
+    var _a, _b;
     try {
         const { id } = req.params;
-        await scheduleService.deleteSchedule(Number(id));
+        const { dayOfWeek, startTime, endTime } = req.body;
+        const scheduleId = Number(id);
+        const existingSchedule = await scheduleService.getScheduleById(scheduleId);
+        if (!existingSchedule) {
+            res.status(404).json({ error: 'Schedule not found' });
+            return;
+        }
+        if (((_a = req.user) === null || _a === void 0 ? void 0 : _a.role) !== 'admin' && existingSchedule.userId !== ((_b = req.user) === null || _b === void 0 ? void 0 : _b.userId)) {
+            res.status(403).json({ error: 'Not authorized to update this schedule' });
+            return;
+        }
+        if (!dayOfWeek || !startTime || !endTime) {
+            res.status(400).json({ error: 'Missing required fields' });
+            return;
+        }
+        const updatedSchedule = await scheduleService.updateSchedule(scheduleId, dayOfWeek, startTime, endTime);
+        res.status(200).json({ message: 'Schedule updated', schedule: updatedSchedule });
+    }
+    catch (error) {
+        res.status(400).json({ error: error.message });
+    }
+};
+exports.updateSchedule = updateSchedule;
+const deleteSchedule = async (req, res) => {
+    var _a, _b;
+    try {
+        const { id } = req.params;
+        const scheduleId = Number(id);
+        const existingSchedule = await scheduleService.getScheduleById(scheduleId);
+        if (!existingSchedule) {
+            res.status(404).json({ error: 'Schedule not found' });
+            return;
+        }
+        if (((_a = req.user) === null || _a === void 0 ? void 0 : _a.role) !== 'admin' && existingSchedule.userId !== ((_b = req.user) === null || _b === void 0 ? void 0 : _b.userId)) {
+            res.status(403).json({ error: 'Not authorized to delete this schedule' });
+            return;
+        }
+        await scheduleService.deleteSchedule(scheduleId);
         res.status(200).json({ message: 'Schedule deleted' });
     }
     catch (error) {

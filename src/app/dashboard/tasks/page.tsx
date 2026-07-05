@@ -66,7 +66,7 @@ export default function TasksPage() {
     if (token) {
       try {
         const res = await fetch(`/api/tasks/${draggedTaskId}/status`, {
-          method: "PUT",
+          method: "PATCH",
           headers: {
             "Content-Type": "application/json",
             Authorization: `Bearer ${token}`
@@ -105,7 +105,7 @@ export default function TasksPage() {
 
       if (authRes.ok) {
         const authData = await authRes.json();
-        setUserRole(authData.role);
+        setUserRole(authData.data?.role || authData.role || 'employee');
       }
 
       if (taskRes.ok) {

@@ -1,6 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.updateTask = exports.updateTaskStatus = exports.getTasks = exports.createTask = void 0;
+exports.deleteTask = exports.updateTask = exports.updateTaskStatus = exports.getTasks = exports.createTask = void 0;
 const client_1 = require("@prisma/client");
 const prisma = new client_1.PrismaClient();
 const createTask = async (projectId, title, description, userId, priority = 'medium', dueDate) => {
@@ -32,6 +32,9 @@ const updateTaskStatus = async (id, status, userId, role) => {
     if (['employee', 'hr'].includes(role) && task.userId !== userId) {
         throw new Error('Forbidden. You can only update your own tasks.');
     }
+    if (status === 'completed' && ['employee', 'hr'].includes(role)) {
+        throw new Error('Only admins or CTO can mark a task as completed');
+    }
     return await prisma.task.update({
         where: { id },
         data: { status },
@@ -45,9 +48,18 @@ const updateTask = async (id, data, userId, role) => {
     if (['employee', 'hr'].includes(role) && task.userId !== userId) {
         throw new Error('Forbidden. You can only update your own tasks.');
     }
+    if (data.status === 'completed' && ['employee', 'hr'].includes(role)) {
+        throw new Error('Only admins or CTO can mark a task as completed');
+    }
     return await prisma.task.update({
         where: { id },
         data,
     });
 };
 exports.updateTask = updateTask;
+const deleteTask = async (id) => {
+    return await prisma.task.delete({
+        where: { id },
+    });
+};
+exports.deleteTask = deleteTask;

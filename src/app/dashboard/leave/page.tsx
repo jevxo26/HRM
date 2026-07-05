@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Plus, MoreHorizontal, Edit, Trash2, Search, CalendarOff, Eye } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
+import { ConfirmModal } from "@/components/ui/confirm-modal";
 import { LeaveFormModal } from "./LeaveFormModal";
 import { LeaveDetailsModal } from "./LeaveDetailsModal";
 import { toast } from "sonner";
@@ -33,6 +34,7 @@ export default function LeavePage() {
   const [isDetailsModalOpen, setIsDetailsModalOpen] = useState(false);
   const [editingRequest, setEditingRequest] = useState<LeaveRequest | null>(null);
   const [detailsRequest, setDetailsRequest] = useState<LeaveRequest | null>(null);
+  const [deleteId, setDeleteId] = useState<number | null>(null);
   const [userRole, setUserRole] = useState<string>("");
 
   const fetchLeaves = async () => {
@@ -88,9 +90,28 @@ export default function LeavePage() {
     fetchLeaves();
   }, []);
 
-  const handleDelete = async (id: number) => {
-    // Only implemented if there's a delete route, which we don't know exists, so skip for now or implement gracefully
-    toast.error("Delete functionality for leaves is usually disabled.");
+  const handleDelete = async () => {
+    if (!deleteId) return;
+    const token = localStorage.getItem("token");
+    if (!token) return;
+
+    try {
+      const res = await fetch(`/api/leaves/${deleteId}`, {
+        method: "DELETE",
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      if (res.ok) {
+        toast.success("Leave request deleted");
+        fetchLeaves();
+      } else {
+        const error = await res.json();
+        toast.error(error.message || "Failed to delete leave request");
+      }
+    } catch (error) {
+      toast.error("Failed to delete leave request");
+    } finally {
+      setDeleteId(null);
+    }
   };
 
   const filteredRequests = requests.filter(r => 
@@ -224,6 +245,17 @@ export default function LeavePage() {
                               <Edit className="h-4 w-4" />
                             </Button>
                           )}
+                          {['cto', 'ceo', 'teamlead', 'hr', 'founder', 'admin'].includes(userRole) && (
+                            <Button 
+                              variant="ghost" 
+                              size="icon"
+                              title="Delete Request"
+                              className="h-9 w-9 text-slate-400 hover:text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-500/20 rounded-xl transition-all shadow-sm hover:shadow"
+                              onClick={() => setDeleteId(req.id)}
+                            >
+                              <Trash2 className="h-4 w-4" />
+                            </Button>
+                          )}
                         </div>
                       </TableCell>
                     </TableRow>
@@ -246,6 +278,14 @@ export default function LeavePage() {
         open={isDetailsModalOpen}
         onOpenChange={setIsDetailsModalOpen}
         leave={detailsRequest}
+      />
+
+      <ConfirmModal
+        isOpen={!!deleteId}
+        onClose={() => setDeleteId(null)}
+        onConfirm={handleDelete}
+        title="Delete Leave Request"
+        description="Are you sure you want to delete this leave request? This action cannot be undone."
       />
     </div>
   );
