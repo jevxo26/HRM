@@ -12,14 +12,25 @@ export default function DashboardPage() {
     const [isCheckingIn, setIsCheckingIn] = useState(false);
     
     // Derived state for today's attendance
-    const todayAttendance = attendances.find((a: any) => {
-        const today = new Date().toISOString().split('T')[0];
-        const attDate = new Date(a.date).toISOString().split('T')[0];
-        return today === attDate;
-    });
+    const today = new Date().toISOString().split('T')[0];
+    const todayAttendances = attendances.filter((a: any) => new Date(a.date).toISOString().split('T')[0] === today);
     
-    const hasCheckedIn = !!todayAttendance?.checkIn;
-    const hasCheckedOut = !!todayAttendance?.checkOut;
+    let totalMilliseconds = 0;
+    let isCurrentlyCheckedIn = false;
+
+    todayAttendances.forEach((a: any) => {
+        if (a.checkIn && !a.checkOut) {
+            isCurrentlyCheckedIn = true;
+        } else if (a.checkIn && a.checkOut) {
+            totalMilliseconds += (new Date(a.checkOut).getTime() - new Date(a.checkIn).getTime());
+        }
+    });
+
+    const totalHours = totalMilliseconds / (1000 * 60 * 60);
+    const shiftCompleted = totalHours >= 5;
+    
+    const hasCheckedIn = isCurrentlyCheckedIn || shiftCompleted;
+    const hasCheckedOut = !isCurrentlyCheckedIn || shiftCompleted;
 
     const [projects, setProjects] = useState<any[]>([]);
     const [profile, setProfile] = useState<any>(null);

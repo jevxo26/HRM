@@ -4,7 +4,7 @@ import React, { useEffect, useState } from "react";
 import { ConfirmModal } from "@/components/ui/confirm-modal";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
-import { Plus, Edit, Trash2, Search, Clock } from "lucide-react";
+import { Plus, Edit, Trash2, Search, Clock, CheckCircle2 } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { toast } from "sonner";
@@ -156,25 +156,55 @@ export default function AttendancePage() {
     return true; // "all"
   });
 
+  const today = new Date().toISOString().split('T')[0];
+  const todayAttendances = records.filter(a => new Date(a.date).toISOString().split('T')[0] === today);
+  
+  let totalMilliseconds = 0;
+  let isCurrentlyCheckedIn = false;
+
+  todayAttendances.forEach(a => {
+      if (a.checkIn && !a.checkOut) {
+          isCurrentlyCheckedIn = true;
+      } else if (a.checkIn && a.checkOut) {
+          totalMilliseconds += (new Date(a.checkOut).getTime() - new Date(a.checkIn).getTime());
+      }
+  });
+
+  const totalHours = totalMilliseconds / (1000 * 60 * 60);
+  const shiftCompleted = totalHours >= 5;
+
   return (
     <div className="space-y-6">
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <h1 className="text-3xl font-bold tracking-tight">Attendance</h1>
-        <div className="flex gap-2">
-          <Button 
-            onClick={() => handleAction('check-in')} 
-            disabled={actionLoading}
-            className="bg-green-600 hover:bg-green-700 text-white"
-          >
-            Check In
-          </Button>
-          <Button 
-            onClick={() => handleAction('check-out')}
-            disabled={actionLoading} 
-            variant="destructive"
-          >
-            Check Out
-          </Button>
+        <div className="flex gap-2 items-center">
+          {shiftCompleted ? (
+            <div className="bg-emerald-100 text-emerald-800 px-4 py-2 rounded-md font-semibold flex items-center gap-2">
+              <CheckCircle2 className="w-5 h-5" />
+              Shift Completed
+            </div>
+          ) : (
+            <>
+              {!isCurrentlyCheckedIn && (
+                <Button 
+                  onClick={() => handleAction('check-in')} 
+                  disabled={actionLoading}
+                  className="bg-green-600 hover:bg-green-700 text-white"
+                >
+                  Check In
+                </Button>
+              )}
+              {isCurrentlyCheckedIn && (
+                <Button 
+                  onClick={() => handleAction('check-out')}
+                  disabled={actionLoading} 
+                  variant="destructive"
+                >
+                  Check Out
+                </Button>
+              )}
+            </>
+          )}
           {userRole !== "employee" && (
             <Button 
               className="bg-indigo-600 hover:bg-indigo-700 text-white ml-2"
@@ -188,6 +218,7 @@ export default function AttendancePage() {
           )}
         </div>
       </div>
+
 
       <Card className="border-0 shadow-2xl bg-white/40 dark:bg-slate-900/40 backdrop-blur-2xl ring-1 ring-white/60 dark:ring-slate-800/60 overflow-hidden rounded-[2rem]">
         <CardHeader className="px-8 pb-6 pt-8 border-b border-slate-200/40 dark:border-slate-800/60 bg-white/20 dark:bg-slate-900/20">
