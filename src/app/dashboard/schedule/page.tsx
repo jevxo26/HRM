@@ -148,39 +148,39 @@ export default function SchedulePage() {
       </div>
 
       <Tabs defaultValue="my-schedule" className="space-y-6">
-        <TabsList className="bg-[#0F0F12] border border-white/5 p-1 rounded-xl">
-          <TabsTrigger value="my-schedule" className="rounded-lg data-[state=active]:bg-indigo-500/20 data-[state=active]:text-indigo-400">My Schedule</TabsTrigger>
-          <TabsTrigger value="team-schedule" className="rounded-lg data-[state=active]:bg-indigo-500/20 data-[state=active]:text-indigo-400">Team Schedule</TabsTrigger>
+        <TabsList className="bg-white border border-slate-200 p-1 rounded-xl shadow-sm">
+          <TabsTrigger value="my-schedule" className="rounded-lg data-[state=active]:bg-indigo-100 data-[state=active]:text-indigo-700">My Schedule</TabsTrigger>
+          <TabsTrigger value="team-schedule" className="rounded-lg data-[state=active]:bg-indigo-100 data-[state=active]:text-indigo-700">Team Schedule</TabsTrigger>
         </TabsList>
 
         <TabsContent value="my-schedule">
-          <Card className="border-0 shadow-2xl bg-[#0F0F12] overflow-hidden rounded-[2rem] border border-white/5">
-            <CardHeader className="px-8 pb-6 pt-8 border-b border-white/5 bg-[#0F0F12]">
+          <Card className="border-0 shadow-xl bg-white overflow-hidden rounded-[2rem] border border-slate-200">
+            <CardHeader className="px-8 pb-6 pt-8 border-b border-slate-200 bg-white">
               <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
                 <div>
-                  <CardTitle className="text-2xl font-bold text-white flex items-center gap-3">
-                    <div className="p-2.5 bg-indigo-500/20 rounded-xl">
-                      <User className="h-6 w-6 text-indigo-400" />
+                  <CardTitle className="text-2xl font-bold text-slate-900 flex items-center gap-3">
+                    <div className="p-2.5 bg-indigo-100 rounded-xl">
+                      <User className="h-6 w-6 text-indigo-600" />
                     </div>
                     My Schedule
                   </CardTitle>
-                  <p className="text-slate-400 mt-2 text-sm ml-14">Manage your personal weekly schedule</p>
+                  <p className="text-slate-500 mt-2 text-sm ml-14">Manage your personal weekly schedule</p>
                 </div>
               </div>
             </CardHeader>
-            <CardContent className="p-0 bg-[#0F0F12]">
+            <CardContent className="p-0 bg-white">
               <div className="w-full overflow-x-auto p-6">
-                <div className="min-w-[800px] border border-white/10 rounded-2xl overflow-hidden bg-[#16161A] pb-1">
-                  <div className="grid grid-cols-8 border-b border-white/10 text-slate-400">
-                    <div className="px-6 py-4 flex items-center gap-2 border-r border-white/10 col-span-2">
-                      <Calendar className="h-4 w-4 text-indigo-400" />
-                      <span className="font-semibold text-white text-sm">Day</span>
+                <div className="min-w-[800px] border border-slate-200 rounded-2xl overflow-hidden bg-white pb-1 shadow-sm">
+                  <div className="grid grid-cols-8 border-b border-slate-200 text-slate-500 bg-slate-50/50">
+                    <div className="px-6 py-4 flex items-center gap-2 border-r border-slate-200 col-span-2">
+                      <Calendar className="h-4 w-4 text-indigo-600" />
+                      <span className="font-semibold text-slate-700 text-sm">Day</span>
                     </div>
-                    <div className="px-6 py-4 flex items-center gap-2 border-r border-white/10 col-span-4">
-                      <span className="font-semibold text-white text-sm">Time</span>
+                    <div className="px-6 py-4 flex items-center gap-2 border-r border-slate-200 col-span-4">
+                      <span className="font-semibold text-slate-700 text-sm">Time</span>
                     </div>
-                    <div className="px-6 py-4 flex items-center gap-2 border-white/10 col-span-2 justify-end">
-                      <span className="font-semibold text-white text-sm">Actions</span>
+                    <div className="px-6 py-4 flex items-center gap-2 border-slate-200 col-span-2 justify-end">
+                      <span className="font-semibold text-slate-700 text-sm">Actions</span>
                     </div>
                   </div>
                   
@@ -189,30 +189,30 @@ export default function SchedulePage() {
                       <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-indigo-500"></div>
                     </div>
                   ) : filteredSchedules.filter(s => s.userId === userId).length === 0 ? (
-                    <div className="flex flex-col items-center justify-center gap-2 h-48 text-slate-400">
+                    <div className="flex flex-col items-center justify-center gap-2 h-48 text-slate-500">
                       You haven't scheduled any days yet.
                     </div>
                   ) : (
-                    <div className="divide-y divide-white/5">
+                    <div className="divide-y divide-slate-100">
                       {daysOfWeek.map((day) => {
                         const mySched = filteredSchedules.find(s => s.userId === userId && s.dayOfWeek === day.name);
                         if (!mySched) return null;
                         
                         return (
-                          <div key={day.name} className="grid grid-cols-8 hover:bg-white/5 transition-colors duration-200">
-                            <div className="px-6 py-4 flex items-center gap-3 border-r border-white/5 col-span-2">
-                              <day.icon className="h-5 w-5 text-indigo-400" />
-                              <span className="font-semibold text-slate-200">{day.name}</span>
+                          <div key={day.name} className="grid grid-cols-8 hover:bg-slate-50 transition-colors duration-200">
+                            <div className="px-6 py-4 flex items-center gap-3 border-r border-slate-100 col-span-2">
+                              <day.icon className="h-5 w-5 text-indigo-600" />
+                              <span className="font-semibold text-slate-700">{day.name}</span>
                             </div>
-                            <div className="px-6 py-4 flex flex-row items-center border-r border-white/5 col-span-4 gap-4">
-                              <span className="text-sm font-semibold text-emerald-400">{formatAMPM(mySched.startTime)}</span>
-                              <span className="text-slate-500">-</span>
-                              <span className="text-sm font-semibold text-rose-400">{formatAMPM(mySched.endTime)}</span>
+                            <div className="px-6 py-4 flex flex-row items-center border-r border-slate-100 col-span-4 gap-4">
+                              <span className="text-sm font-semibold text-emerald-600">{formatAMPM(mySched.startTime)}</span>
+                              <span className="text-slate-400">-</span>
+                              <span className="text-sm font-semibold text-rose-600">{formatAMPM(mySched.endTime)}</span>
                             </div>
                             <div className="px-6 py-4 flex items-center justify-end gap-2 col-span-2">
                               <Button 
                                 variant="ghost" size="icon"
-                                className="h-8 w-8 text-slate-400 hover:text-indigo-400 hover:bg-indigo-500/20"
+                                className="h-8 w-8 text-slate-500 hover:text-indigo-600 hover:bg-indigo-50"
                                 onClick={() => {
                                   setEditingSchedule(mySched);
                                   setIsModalOpen(true);
@@ -222,7 +222,7 @@ export default function SchedulePage() {
                               </Button>
                               <Button 
                                 variant="ghost" size="icon"
-                                className="h-8 w-8 text-slate-400 hover:text-rose-400 hover:bg-rose-500/20"
+                                className="h-8 w-8 text-slate-500 hover:text-rose-600 hover:bg-rose-50"
                                 onClick={() => setDeleteId(mySched.id)}
                               >
                                 <Trash2 className="h-4 w-4" />
@@ -240,43 +240,43 @@ export default function SchedulePage() {
         </TabsContent>
 
         <TabsContent value="team-schedule">
-          <Card className="border-0 shadow-2xl bg-[#0F0F12] overflow-hidden rounded-[2rem] border border-white/5">
-        <CardHeader className="px-8 pb-6 pt-8 border-b border-white/5 bg-[#0F0F12]">
+          <Card className="border-0 shadow-xl bg-white overflow-hidden rounded-[2rem] border border-slate-200">
+        <CardHeader className="px-8 pb-6 pt-8 border-b border-slate-200 bg-white">
           <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
             <div>
-              <CardTitle className="text-2xl font-bold text-white flex items-center gap-3">
-                <div className="p-2.5 bg-indigo-500/20 rounded-xl">
-                  <Calendar className="h-6 w-6 text-indigo-400" />
+              <CardTitle className="text-2xl font-bold text-slate-900 flex items-center gap-3">
+                <div className="p-2.5 bg-indigo-100 rounded-xl">
+                  <Calendar className="h-6 w-6 text-indigo-600" />
                 </div>
                 Weekly Schedule
               </CardTitle>
-              <p className="text-slate-400 mt-2 text-sm ml-14">Manage weekly employee shifts and meetings</p>
+              <p className="text-slate-500 mt-2 text-sm ml-14">Manage weekly employee shifts and meetings</p>
             </div>
             <div className="w-full sm:w-80 relative group">
-              <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400 group-focus-within:text-indigo-500 transition-colors duration-300" />
+              <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400 group-focus-within:text-indigo-600 transition-colors duration-300" />
               <Input 
                 placeholder="Search employee..." 
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
-                className="h-11 pl-11 bg-white/5 border-white/10 text-white focus-visible:ring-2 focus-visible:ring-indigo-500/50 rounded-2xl shadow-sm hover:bg-white/10 transition-all duration-300 placeholder:text-slate-500"
+                className="h-11 pl-11 bg-white border-slate-200 text-slate-900 focus-visible:ring-2 focus-visible:ring-indigo-500/50 rounded-2xl shadow-sm hover:bg-slate-50 transition-all duration-300 placeholder:text-slate-500"
               />
             </div>
           </div>
         </CardHeader>
-        <CardContent className="p-0 bg-[#0F0F12]">
+        <CardContent className="p-0 bg-white">
           <div className="w-full overflow-x-auto p-6">
-            <div className="min-w-[1000px] border border-white/10 rounded-2xl overflow-hidden bg-[#16161A] pb-1">
-              <div className="grid grid-cols-8 border-b border-white/10 text-slate-400">
-                <div className="px-6 py-4 flex items-center gap-2 border-r border-white/10">
-                  <User className="h-4 w-4 text-indigo-400" />
-                  <span className="font-semibold text-white text-sm">Employee</span>
+            <div className="min-w-[1000px] border border-slate-200 rounded-2xl overflow-hidden bg-white pb-1 shadow-sm">
+              <div className="grid grid-cols-8 border-b border-slate-200 text-slate-500 bg-slate-50/50">
+                <div className="px-6 py-4 flex items-center gap-2 border-r border-slate-200">
+                  <User className="h-4 w-4 text-indigo-600" />
+                  <span className="font-semibold text-slate-700 text-sm">Employee</span>
                 </div>
                 {daysOfWeek.map((day) => {
                   const Icon = day.icon;
                   return (
-                    <div key={day.name} className="px-4 py-4 flex flex-col items-center justify-center gap-1 border-r border-white/10 last:border-r-0">
-                      <Icon className="h-4 w-4 text-indigo-400" />
-                      <span className="text-xs font-medium text-white">{day.name.substring(0, 3)}</span>
+                    <div key={day.name} className="px-4 py-4 flex flex-col items-center justify-center gap-1 border-r border-slate-200 last:border-r-0">
+                      <Icon className="h-4 w-4 text-indigo-600" />
+                      <span className="text-xs font-medium text-slate-700">{day.name.substring(0, 3)}</span>
                     </div>
                   );
                 })}
@@ -302,14 +302,14 @@ export default function SchedulePage() {
                   <span className="text-base font-medium text-slate-400">No scheduled events found</span>
                 </div>
               ) : (
-                <div className="divide-y divide-white/5">
+                <div className="divide-y divide-slate-100">
                   {groupedSchedules.map((userGroup, index) => (
-                    <div key={index} className="grid grid-cols-8 hover:bg-white/5 transition-colors duration-200">
-                      <div className="px-6 py-4 flex items-center gap-3 border-r border-white/5">
-                        <div className="h-8 w-8 rounded-full bg-indigo-500/20 flex items-center justify-center text-indigo-400 font-bold text-xs">
+                    <div key={index} className="grid grid-cols-8 hover:bg-slate-50 transition-colors duration-200">
+                      <div className="px-6 py-4 flex items-center gap-3 border-r border-slate-100">
+                        <div className="h-8 w-8 rounded-full bg-indigo-100 flex items-center justify-center text-indigo-700 font-bold text-xs">
                           {userGroup.name.substring(0, 2).toUpperCase()}
                         </div>
-                        <span className="font-semibold text-slate-200 text-sm truncate">{userGroup.name}</span>
+                        <span className="font-semibold text-slate-700 text-sm truncate">{userGroup.name}</span>
                       </div>
                       
                       {daysOfWeek.map((day) => {
@@ -317,7 +317,7 @@ export default function SchedulePage() {
                         return (
                           <div 
                             key={day.name} 
-                            className={`px-3 py-4 flex items-center justify-center border-r border-white/5 last:border-r-0 ${scheduleForDay ? 'cursor-pointer hover:bg-white/10' : ''}`}
+                            className={`px-3 py-4 flex items-center justify-center border-r border-slate-100 last:border-r-0 ${scheduleForDay ? 'cursor-pointer hover:bg-slate-100' : ''}`}
                             onClick={() => {
                               if (scheduleForDay && userRole !== "employee") {
                                 setEditingSchedule(scheduleForDay);
@@ -327,12 +327,12 @@ export default function SchedulePage() {
                           >
                             {scheduleForDay ? (
                               <div className="flex flex-col items-center text-center">
-                                <span className="text-[11px] font-semibold text-emerald-400 whitespace-nowrap">{formatAMPM(scheduleForDay.startTime)}</span>
-                                <span className="text-[10px] text-slate-500 my-0.5">-</span>
-                                <span className="text-[11px] font-semibold text-rose-400 whitespace-nowrap">{formatAMPM(scheduleForDay.endTime)}</span>
+                                <span className="text-[11px] font-semibold text-emerald-600 whitespace-nowrap">{formatAMPM(scheduleForDay.startTime)}</span>
+                                <span className="text-[10px] text-slate-400 my-0.5">-</span>
+                                <span className="text-[11px] font-semibold text-rose-600 whitespace-nowrap">{formatAMPM(scheduleForDay.endTime)}</span>
                               </div>
                             ) : (
-                              <span className="text-slate-700 text-xl font-light">-</span>
+                              <span className="text-slate-300 text-xl font-light">-</span>
                             )}
                           </div>
                         );

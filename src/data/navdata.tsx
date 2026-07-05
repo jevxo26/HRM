@@ -11,5 +11,5 @@ export const navItems = [
   { name: "Leave", href: "/dashboard/leave", icon: Calendar, roles: ["hr", "cto", "ceo", "founder", "teamlead", "employee"] },
   { name: "Leave Type", href: "/dashboard/leave-type", icon: FileText, roles: ["hr", "cto", "ceo", "founder", "teamlead"] },
   { name: "Schedule", href: "/dashboard/schedule", icon: Clock, roles: ["hr", "cto", "ceo", "founder", "teamlead", "employee"] },
-  { name: "Settings", href: "/dashboard/settings", icon: Settings, roles: ["cto", "ceo", "founder", "teamlead"] },
+  // { name: "Settings", href: "/dashboard/settings", icon: Settings, roles: ["cto", "ceo", "founder", "teamlead"] },
 ];
