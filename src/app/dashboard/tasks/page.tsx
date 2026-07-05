@@ -2,9 +2,8 @@
 
 import React, { useEffect, useState } from "react";
 import { ConfirmModal } from "@/components/ui/confirm-modal";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
-import { Plus, MoreHorizontal, Edit, Trash2, Search, CheckCircle2, Eye } from "lucide-react";
+import { Plus, MoreHorizontal, Edit, Trash2, Search, CheckCircle2, Eye, GripVertical } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { TaskFormModal } from "./TaskFormModal";
@@ -32,6 +31,62 @@ export default function TasksPage() {
   const [editingTask, setEditingTask] = useState<Task | null>(null);
   const [viewingTask, setViewingTask] = useState<Task | null>(null);
   const [userRole, setUserRole] = useState<string>("employee");
+  const [draggedTaskId, setDraggedTaskId] = useState<number | null>(null);
+
+  const handleDragStart = (e: React.DragEvent, id: number) => {
+    setDraggedTaskId(id);
+    e.dataTransfer.effectAllowed = "move";
+  };
+
+  const handleDragOver = (e: React.DragEvent) => {
+    e.preventDefault();
+    e.dataTransfer.dropEffect = "move";
+  };
+
+  const handleDrop = async (e: React.DragEvent, newStatus: string) => {
+    e.preventDefault();
+    if (draggedTaskId === null) return;
+    
+    if (newStatus === "completed" && ["employee", "hr"].includes(userRole)) {
+      toast.error("Only Admins or CTO can mark a task as completed");
+      setDraggedTaskId(null);
+      return;
+    }
+
+    const taskToUpdate = tasks.find(t => t.id === draggedTaskId);
+    if (!taskToUpdate || taskToUpdate.status === newStatus) {
+      setDraggedTaskId(null);
+      return;
+    }
+
+    const previousTasks = [...tasks];
+    setTasks(tasks.map(t => t.id === draggedTaskId ? { ...t, status: newStatus } : t));
+    
+    const token = localStorage.getItem("token");
+    if (token) {
+      try {
+        const res = await fetch(`/api/tasks/${draggedTaskId}/status`, {
+          method: "PUT",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`
+          },
+          body: JSON.stringify({ status: newStatus })
+        });
+        
+        if (!res.ok) {
+          const errorData = await res.json().catch(() => ({}));
+          throw new Error(errorData.error || "Failed to update status");
+        }
+        
+        toast.success(`Task moved to ${newStatus.replace("_", " ")}`);
+      } catch (error: any) {
+        toast.error(error.message || "Failed to update task status");
+        setTasks(previousTasks);
+      }
+    }
+    setDraggedTaskId(null);
+  };
 
   const fetchTasks = async () => {
     setLoading(true);
@@ -99,9 +154,16 @@ export default function TasksPage() {
     (t.title || "").toLowerCase().includes(search.toLowerCase())
   );
 
+  const columns = [
+    { id: "pending", title: "To Do", bgColor: "bg-slate-100 dark:bg-slate-800/50", borderColor: "border-slate-200 dark:border-slate-700" },
+    { id: "in_progress", title: "In Progress", bgColor: "bg-indigo-50 dark:bg-indigo-900/20", borderColor: "border-indigo-200 dark:border-indigo-800" },
+    { id: "in_review", title: "In Review", bgColor: "bg-amber-50 dark:bg-amber-900/20", borderColor: "border-amber-200 dark:border-amber-800" },
+    { id: "completed", title: "Completed", bgColor: "bg-emerald-50 dark:bg-emerald-900/20", borderColor: "border-emerald-200 dark:border-emerald-800" }
+  ];
+
   return (
-    <div className="space-y-6">
-      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+    <div className="space-y-6 h-[calc(100vh-6rem)] flex flex-col">
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 shrink-0">
         <h1 className="text-3xl font-bold tracking-tight">Tasks</h1>
         {userRole !== "employee" && (
           <Button 
@@ -116,144 +178,127 @@ export default function TasksPage() {
         )}
       </div>
 
-      <Card className="border-0 shadow-2xl bg-white/40 dark:bg-slate-900/40 backdrop-blur-2xl ring-1 ring-white/60 dark:ring-slate-800/60 overflow-hidden rounded-[2rem]">
-        <CardHeader className="px-8 pb-6 pt-8 border-b border-slate-200/40 dark:border-slate-800/60 bg-white/20 dark:bg-slate-900/20">
-          <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-            <CardTitle className="text-2xl font-bold bg-gradient-to-r from-indigo-600 via-purple-600 to-indigo-600 bg-clip-text text-transparent flex items-center gap-3 animate-gradient-x">
-              <div className="p-2.5 bg-indigo-100 dark:bg-indigo-500/20 rounded-xl">
-                <CheckCircle2 className="h-6 w-6 text-indigo-600 dark:text-indigo-400" />
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 p-6 bg-white/40 dark:bg-slate-900/40 backdrop-blur-2xl ring-1 ring-white/60 dark:ring-slate-800/60 rounded-[2rem] shadow-sm shrink-0">
+        <div className="flex items-center gap-3">
+          <div className="p-2.5 bg-indigo-100 dark:bg-indigo-500/20 rounded-xl">
+            <CheckCircle2 className="h-6 w-6 text-indigo-600 dark:text-indigo-400" />
+          </div>
+          <h2 className="text-xl font-bold bg-gradient-to-r from-indigo-600 via-purple-600 to-indigo-600 bg-clip-text text-transparent">
+            Task Board
+          </h2>
+        </div>
+        <div className="w-full sm:w-80 relative group">
+          <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400 group-focus-within:text-indigo-500 transition-colors duration-300" />
+          <Input 
+            placeholder="Search tasks..." 
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            className="h-11 pl-11 bg-white/60 dark:bg-slate-950/60 border-slate-200/60 dark:border-slate-800/60 focus-visible:ring-2 focus-visible:ring-indigo-500/50 rounded-2xl shadow-sm hover:bg-white/80 dark:hover:bg-slate-900/80 transition-all duration-300"
+          />
+        </div>
+      </div>
+
+      <div className="flex gap-6 overflow-x-auto pb-4 flex-1 h-full min-h-0">
+        {loading ? (
+          <div className="flex w-full items-center justify-center">
+            <div className="flex flex-col items-center justify-center gap-3">
+              <div className="relative flex h-8 w-8 items-center justify-center">
+                <div className="absolute inline-flex h-full w-full animate-ping rounded-full bg-indigo-400 opacity-75"></div>
+                <div className="relative inline-flex h-4 w-4 rounded-full bg-indigo-500"></div>
               </div>
-              All Tasks
-            </CardTitle>
-            <div className="w-full sm:w-80 relative group">
-              <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400 group-focus-within:text-indigo-500 transition-colors duration-300" />
-              <Input 
-                placeholder="Search tasks..." 
-                value={search}
-                onChange={(e) => setSearch(e.target.value)}
-                className="h-11 pl-11 bg-white/60 dark:bg-slate-950/60 border-slate-200/60 dark:border-slate-800/60 focus-visible:ring-2 focus-visible:ring-indigo-500/50 rounded-2xl shadow-sm hover:bg-white/80 dark:hover:bg-slate-900/80 transition-all duration-300"
-              />
+              <span className="text-sm font-medium text-slate-500 dark:text-slate-400 animate-pulse">Loading board...</span>
             </div>
           </div>
-        </CardHeader>
-        <CardContent className="p-0">
-          <div className="w-full overflow-x-auto">
-            <Table className="w-full">
-              <TableHeader className="bg-slate-50/50 dark:bg-slate-800/30 border-b border-slate-200/50 dark:border-slate-800/60 backdrop-blur-md">
-                <TableRow className="hover:bg-transparent border-none">
-                  <TableHead className="font-semibold text-slate-700 dark:text-slate-300 py-5 px-8 uppercase tracking-wider text-xs">Title</TableHead>
-                  <TableHead className="font-semibold text-slate-700 dark:text-slate-300 py-5 px-6 uppercase tracking-wider text-xs">Status</TableHead>
-                  <TableHead className="font-semibold text-slate-700 dark:text-slate-300 py-5 px-6 uppercase tracking-wider text-xs">Priority</TableHead>
-                  <TableHead className="font-semibold text-slate-700 dark:text-slate-300 py-5 px-6 uppercase tracking-wider text-xs">Due Date</TableHead>
-                  <TableHead className="text-right font-semibold text-slate-700 dark:text-slate-300 py-5 px-8 uppercase tracking-wider text-xs">Actions</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {loading ? (
-                  <TableRow>
-                    <TableCell colSpan={5} className="text-center h-48">
-                      <div className="flex flex-col items-center justify-center gap-3">
-                        <div className="relative flex h-8 w-8 items-center justify-center">
-                          <div className="absolute inline-flex h-full w-full animate-ping rounded-full bg-indigo-400 opacity-75"></div>
-                          <div className="relative inline-flex h-4 w-4 rounded-full bg-indigo-500"></div>
-                        </div>
-                        <span className="text-sm font-medium text-slate-500 dark:text-slate-400 animate-pulse">Loading amazing tasks...</span>
-                      </div>
-                    </TableCell>
-                  </TableRow>
-                ) : filteredTasks.length === 0 ? (
-                  <TableRow>
-                    <TableCell colSpan={5} className="text-center h-48">
-                      <div className="flex flex-col items-center justify-center gap-2">
-                        <CheckCircle2 className="h-10 w-10 text-slate-300 dark:text-slate-700 mb-2" />
-                        <span className="text-base font-medium text-slate-600 dark:text-slate-400">No tasks found</span>
-                        <span className="text-sm text-slate-400 dark:text-slate-500">Try adjusting your search criteria</span>
-                      </div>
-                    </TableCell>
-                  </TableRow>
-                ) : (
-                  filteredTasks.map((task, index) => (
-                    <TableRow 
+        ) : (
+          columns.map(col => {
+            const colTasks = filteredTasks.filter(t => t.status === col.id);
+            
+            return (
+              <div 
+                key={col.id}
+                className={`flex flex-col w-80 shrink-0 rounded-2xl border ${col.borderColor} ${col.bgColor} p-4`}
+                onDragOver={handleDragOver}
+                onDrop={(e) => handleDrop(e, col.id)}
+              >
+                <div className="flex items-center justify-between mb-4">
+                  <h3 className="font-semibold text-slate-700 dark:text-slate-300 capitalize">{col.title}</h3>
+                  <span className="bg-white dark:bg-slate-800 text-slate-500 text-xs px-2.5 py-1 rounded-full shadow-sm font-medium">
+                    {colTasks.length}
+                  </span>
+                </div>
+                
+                <div className="flex flex-col gap-4 overflow-y-auto min-h-[100px] h-full pb-2 pr-1">
+                  {colTasks.map(task => (
+                    <Card 
                       key={task.id}
-                      className={`group border-b border-slate-100/50 dark:border-slate-800/40 transition-all duration-300 hover:bg-white/80 dark:hover:bg-slate-800/50 hover:shadow-[0_4px_20px_-4px_rgba(0,0,0,0.05)] dark:hover:shadow-[0_4px_20px_-4px_rgba(0,0,0,0.2)] ${index % 2 === 0 ? 'bg-transparent' : 'bg-slate-50/20 dark:bg-slate-900/20'}`}
+                      draggable
+                      onDragStart={(e) => handleDragStart(e, task.id)}
+                      className="border-0 shadow-sm hover:shadow-md transition-all duration-200 cursor-grab active:cursor-grabbing bg-white/90 dark:bg-slate-900/90 backdrop-blur group"
                     >
-                      <TableCell className="px-8 py-5">
-                        <div className="flex items-center gap-3">
-                          <div className="h-10 w-10 rounded-full bg-gradient-to-br from-indigo-100 to-purple-100 dark:from-indigo-900/50 dark:to-purple-900/50 flex items-center justify-center text-indigo-700 dark:text-indigo-300 font-bold text-sm shadow-inner">
-                            {task.title.substring(0, 2).toUpperCase()}
+                      <CardContent className="p-4 flex flex-col gap-3">
+                        <div className="flex items-start justify-between gap-2">
+                          <div className="flex gap-2">
+                            <GripVertical className="h-4 w-4 text-slate-400 mt-0.5 shrink-0" />
+                            <h4 className="font-medium text-sm leading-tight text-slate-800 dark:text-slate-200 line-clamp-2">
+                              {task.title}
+                            </h4>
                           </div>
-                          <div>
-                            <span className="font-semibold text-slate-900 dark:text-slate-100 text-base">{task.title}</span>
-                          </div>
-                        </div>
-                      </TableCell>
-                      <TableCell className="px-6 py-5">
-                        <span className="inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-semibold bg-indigo-50 text-indigo-700 dark:bg-indigo-500/10 dark:text-indigo-300 border border-indigo-100 dark:border-indigo-500/20 shadow-sm capitalize">
-                          <div className="w-1.5 h-1.5 rounded-full bg-indigo-500"></div>
-                          {task.status.replace("_", " ")}
-                        </span>
-                      </TableCell>
-                      <TableCell className="px-6 py-5">
-                        <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium capitalize shadow-sm ${
-                          task.priority === 'high' ? 'bg-rose-100 text-rose-800 border-rose-200' :
-                          task.priority === 'medium' ? 'bg-amber-100 text-amber-800 border-amber-200' :
-                          'bg-emerald-100 text-emerald-800 border-emerald-200'
-                        } border`}>
-                          {task.priority || 'Medium'}
-                        </span>
-                      </TableCell>
-                      <TableCell className="px-6 py-5 text-slate-600 dark:text-slate-300">
-                        {task.dueDate ? new Date(task.dueDate).toLocaleString(undefined, {
-                          year: 'numeric', month: 'short', day: 'numeric',
-                          hour: '2-digit', minute: '2-digit'
-                        }) : 'N/A'}
-                      </TableCell>
-                      <TableCell className="text-right px-8 py-5">
-                        <div className="flex items-center justify-end gap-2 opacity-0 group-hover:opacity-100 transition-all duration-300 translate-x-2 group-hover:translate-x-0">
-                          <Button 
-                            variant="ghost" 
-                            size="icon"
-                            className="h-9 w-9 text-slate-400 hover:text-indigo-600 hover:bg-indigo-50 dark:hover:bg-indigo-500/20 rounded-xl transition-all shadow-sm hover:shadow"
-                            onClick={() => {
-                              setViewingTask(task);
-                              setIsDetailModalOpen(true);
-                            }}
-                          >
-                            <Eye className="h-4 w-4" />
-                          </Button>
                           {userRole !== "employee" && (
-                            <>
-                              <Button 
-                                variant="ghost" 
-                                size="icon"
-                                className="h-9 w-9 text-slate-400 hover:text-indigo-600 hover:bg-indigo-50 dark:hover:bg-indigo-500/20 rounded-xl transition-all shadow-sm hover:shadow"
-                                onClick={() => {
-                                  setEditingTask(task);
-                                  setIsModalOpen(true);
-                                }}
+                            <div className="flex gap-1 shrink-0 opacity-0 group-hover:opacity-100 hover:opacity-100 transition-opacity">
+                              <button 
+                                onClick={(e) => { e.stopPropagation(); setEditingTask(task); setIsModalOpen(true); }}
+                                className="text-slate-400 hover:text-indigo-600 p-1"
                               >
-                                <Edit className="h-4 w-4" />
-                              </Button>
-                              <Button 
-                                variant="ghost" 
-                                size="icon"
-                                className="h-9 w-9 text-slate-400 hover:text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-500/20 rounded-xl transition-all shadow-sm hover:shadow"
-                                onClick={() => setDeleteId(task.id)}
+                                <Edit className="h-3.5 w-3.5" />
+                              </button>
+                              <button 
+                                onClick={(e) => { e.stopPropagation(); setDeleteId(task.id); }}
+                                className="text-slate-400 hover:text-rose-600 p-1"
                               >
-                                <Trash2 className="h-4 w-4" />
-                              </Button>
-                            </>
+                                <Trash2 className="h-3.5 w-3.5" />
+                              </button>
+                            </div>
                           )}
                         </div>
-                      </TableCell>
-                    </TableRow>
-                  ))
-                )}
-              </TableBody>
-            </Table>
-          </div>
-        </CardContent>
-      </Card>
+                        
+                        <p className="text-xs text-slate-500 dark:text-slate-400 line-clamp-2">
+                          {task.description || "No description provided."}
+                        </p>
+                        
+                        <div className="flex items-center justify-between mt-1">
+                          <span className={`inline-flex items-center px-2 py-0.5 rounded text-[10px] font-medium capitalize border ${
+                            task.priority === 'high' ? 'bg-rose-50 text-rose-700 border-rose-200' :
+                            task.priority === 'medium' ? 'bg-amber-50 text-amber-700 border-amber-200' :
+                            'bg-emerald-50 text-emerald-700 border-emerald-200'
+                          }`}>
+                            {task.priority || 'Medium'}
+                          </span>
+                          
+                          <div className="flex items-center gap-1">
+                            <button 
+                              onClick={(e) => { e.stopPropagation(); setViewingTask(task); setIsDetailModalOpen(true); }}
+                              className="text-slate-400 hover:text-indigo-600 bg-slate-50 hover:bg-indigo-50 dark:bg-slate-800 dark:hover:bg-indigo-900/30 p-1.5 rounded-lg transition-colors"
+                              title="View Details"
+                            >
+                              <Eye className="h-3.5 w-3.5" />
+                            </button>
+                          </div>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  ))}
+                  
+                  {colTasks.length === 0 && (
+                    <div className="flex flex-col items-center justify-center h-24 border-2 border-dashed border-slate-200 dark:border-slate-700 rounded-xl text-slate-400 dark:text-slate-500">
+                      <span className="text-sm">Drop here</span>
+                    </div>
+                  )}
+                </div>
+              </div>
+            );
+          })
+        )}
+      </div>
       
       <TaskFormModal 
         open={isModalOpen}

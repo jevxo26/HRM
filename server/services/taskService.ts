@@ -32,6 +32,10 @@ export const updateTaskStatus = async (id: number, status: string, userId: numbe
     throw new Error('Forbidden. You can only update your own tasks.');
   }
 
+  if (status === 'completed' && ['employee', 'hr'].includes(role)) {
+    throw new Error('Only admins or CTO can mark a task as completed');
+  }
+
   return await prisma.task.update({
     where: { id },
     data: { status },
@@ -44,6 +48,10 @@ export const updateTask = async (id: number, data: any, userId: number, role: st
 
   if (['employee', 'hr'].includes(role) && task.userId !== userId) {
     throw new Error('Forbidden. You can only update your own tasks.');
+  }
+
+  if (data.status === 'completed' && ['employee', 'hr'].includes(role)) {
+    throw new Error('Only admins or CTO can mark a task as completed');
   }
 
   return await prisma.task.update({
