@@ -262,7 +262,7 @@ export default function TasksPage() {
               <span className="text-sm font-medium text-slate-500 dark:text-slate-400 animate-pulse">Loading tasks...</span>
             </div>
           </div>
-        ) : ["cto", "ceo", "founder", "teamlead"].includes(userRole.toLowerCase()) ? (
+        ) : ["cto", "ceo", "founder", "teamlead", "employee", "hr"].includes(userRole.toLowerCase()) ? (
           <div className="flex gap-6 overflow-x-auto h-full w-full">
             {columns.map(col => {
               const currentGroupTasks = taskGroups[activeTab] || [];

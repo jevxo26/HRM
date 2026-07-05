@@ -319,9 +319,17 @@ export default function DashboardPage() {
                                                         <UserCircle className="w-3.5 h-3.5" />
                                                         {project.stats.activeUsers}
                                                     </div>
+                                                    <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-indigo-50 text-indigo-700 text-xs font-semibold">
+                                                        <Activity className="w-3.5 h-3.5" />
+                                                        {project.stats.totalTasks} Total
+                                                    </div>
                                                     <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-amber-50 text-amber-700 text-xs font-semibold">
                                                         <Clock className="w-3.5 h-3.5" />
                                                         {project.stats.pendingTasks} Pending
+                                                    </div>
+                                                    <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-blue-50 text-blue-700 text-xs font-semibold">
+                                                        <Activity className="w-3.5 h-3.5" />
+                                                        {project.stats.inreviewTasks} In Review
                                                     </div>
                                                     <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-emerald-50 text-emerald-700 text-xs font-semibold">
                                                         <CheckCircle2 className="w-3.5 h-3.5" />
