@@ -12,7 +12,14 @@ interface Task {
   userId?: number;
   priority: string;
   dueDate: string;
-  assignedTo?: { id: number; name: string; email: string };
+  assignedTo?: {
+    name: string;
+    profile?: {
+      team?: {
+        name: string;
+      }
+    }
+  };
 }
 
 interface TaskDetailModalProps {

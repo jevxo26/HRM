@@ -20,6 +20,7 @@ interface Project {
     totalTasks: number;
     pendingTasks: number;
     successTasks: number;
+    inreviewTasks: number;
     activeUsers: number;
   };
 }
@@ -237,6 +238,14 @@ export default function ProjectsPage() {
                   <span className="inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-medium bg-amber-50 text-amber-700 dark:bg-amber-500/10 dark:text-amber-300 border border-amber-100 dark:border-amber-500/20 shadow-sm">
                     <div className="w-1.5 h-1.5 rounded-full bg-amber-500 animate-pulse"></div>
                     {project.stats?.pendingTasks || 0} Pending
+                  </span>
+                  <span className="inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-medium bg-blue-50 text-blue-700 dark:bg-blue-500/10 dark:text-blue-300 border border-blue-100 dark:border-blue-500/20 shadow-sm">
+                    <div className="w-1.5 h-1.5 rounded-full bg-blue-500"></div>
+                    {project.stats?.inreviewTasks || 0} In Review
+                  </span>
+                  <span className="inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-medium bg-emerald-50 text-emerald-700 dark:bg-emerald-500/10 dark:text-emerald-300 border border-emerald-100 dark:border-emerald-500/20 shadow-sm">
+                    <div className="w-1.5 h-1.5 rounded-full bg-emerald-500"></div>
+                    {project.stats?.successTasks || 0} Completed
                   </span>
                 </div>
                 

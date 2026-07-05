@@ -46,6 +46,7 @@ export const getProjects = async (req: AuthRequest, res: Response): Promise<void
       const tasks = project.tasks || [];
       const pendingTasksCount = tasks.filter((t: any) => t.status === 'pending').length;
       const successTasksCount = tasks.filter((t: any) => t.status === 'completed').length; // assuming 'completed' means success
+      const inreviewTasksCount = tasks.filter((t: any) => ['in_progress', 'in_review'].includes(t.status)).length;
       
       const uniqueUsers = new Set();
       tasks.forEach((t: any) => {
@@ -59,6 +60,7 @@ export const getProjects = async (req: AuthRequest, res: Response): Promise<void
           totalTasks: tasks.length,
           pendingTasks: pendingTasksCount,
           successTasks: successTasksCount,
+          inreviewTasks: inreviewTasksCount,
           activeUsers: activeUsersCount
         }
       };

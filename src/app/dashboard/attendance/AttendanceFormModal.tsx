@@ -61,15 +61,31 @@ export function AttendanceFormModal({ open, onOpenChange, record, onSuccess, use
     if (record) {
       setFormData({
         userId: record.userId?.toString() || "",
-        date: record.date ? new Date(record.date).toISOString().split('T')[0] : "",
-        checkIn: record.checkIn ? new Date(record.checkIn).toISOString().slice(0, 16) : "",
-        checkOut: record.checkOut ? new Date(record.checkOut).toISOString().slice(0, 16) : "",
+        date: record.date ? (() => {
+          const d = new Date(record.date);
+          const pad = (n: number) => n.toString().padStart(2, '0');
+          return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
+        })() : "",
+        checkIn: record.checkIn ? (() => {
+          const d = new Date(record.checkIn);
+          const pad = (n: number) => n.toString().padStart(2, '0');
+          return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`;
+        })() : "",
+        checkOut: record.checkOut ? (() => {
+          const d = new Date(record.checkOut);
+          const pad = (n: number) => n.toString().padStart(2, '0');
+          return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`;
+        })() : "",
         status: record.status || "present",
       });
     } else {
       setFormData({
         userId: "",
-        date: new Date().toISOString().split('T')[0],
+        date: (() => {
+          const d = new Date();
+          const pad = (n: number) => n.toString().padStart(2, '0');
+          return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
+        })(),
         checkIn: "",
         checkOut: "",
         status: "present",

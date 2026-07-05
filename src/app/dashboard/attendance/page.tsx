@@ -8,6 +8,7 @@ import { Plus, Edit, Trash2, Search, Clock } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { toast } from "sonner";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { AttendanceFormModal } from "./AttendanceFormModal";
 
 interface AttendanceRecord {
@@ -29,6 +30,7 @@ export default function AttendancePage() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingRecord, setEditingRecord] = useState<AttendanceRecord | null>(null);
   const [userRole, setUserRole] = useState<string>("employee");
+  const [filter, setFilter] = useState<"today" | "month" | "all" | "default">("default");
 
   const fetchAttendance = async () => {
     setLoading(true);
@@ -47,7 +49,17 @@ export default function AttendancePage() {
 
       if (authRes.ok) {
         const authData = await authRes.json();
-        setUserRole(authData.data?.role || authData.role || 'employee');
+        const role = authData.data?.role || authData.role || 'employee';
+        setUserRole(role);
+        
+        if (filter === "default") {
+          const lowerRole = role.toLowerCase();
+          if (['cto', 'ceo', 'founder', 'teamlead'].includes(lowerRole)) {
+            setFilter("today");
+          } else {
+            setFilter("month");
+          }
+        }
       }
 
       if (attRes.ok) {
@@ -122,9 +134,27 @@ export default function AttendancePage() {
     }
   };
 
-  const filteredRecords = records.filter(r => 
-    (r.date || "").includes(search) || (r.user?.name || "").toLowerCase().includes(search.toLowerCase())
-  );
+  const filteredRecords = records.filter(r => {
+    // Search text filter
+    const matchesSearch = (r.date || "").includes(search) || (r.user?.name || "").toLowerCase().includes(search.toLowerCase());
+    if (!matchesSearch) return false;
+    
+    // Date filter
+    const currentFilter = filter === "default" ? "all" : filter;
+    if (currentFilter === "today") {
+      const today = new Date();
+      const recordDate = new Date(r.date);
+      return today.toDateString() === recordDate.toDateString();
+    }
+    
+    if (currentFilter === "month") {
+      const today = new Date();
+      const recordDate = new Date(r.date);
+      return today.getMonth() === recordDate.getMonth() && today.getFullYear() === recordDate.getFullYear();
+    }
+    
+    return true; // "all"
+  });
 
   return (
     <div className="space-y-6">
@@ -168,14 +198,27 @@ export default function AttendancePage() {
               </div>
               Attendance Records
             </CardTitle>
-            <div className="w-full sm:w-80 relative group">
-              <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400 group-focus-within:text-indigo-500 transition-colors duration-300" />
-              <Input 
-                placeholder="Search by date or name..." 
-                value={search}
-                onChange={(e) => setSearch(e.target.value)}
-                className="h-11 pl-11 bg-white/60 dark:bg-slate-950/60 border-slate-200/60 dark:border-slate-800/60 focus-visible:ring-2 focus-visible:ring-indigo-500/50 rounded-2xl shadow-sm hover:bg-white/80 dark:hover:bg-slate-900/80 transition-all duration-300"
-              />
+            <div className="flex items-center gap-4">
+              <Tabs 
+                value={filter === "default" ? "all" : filter} 
+                onValueChange={(v) => setFilter(v as any)}
+                className="w-auto"
+              >
+                <TabsList className="bg-slate-100/50 dark:bg-slate-800/50">
+                  <TabsTrigger value="today">Today</TabsTrigger>
+                  <TabsTrigger value="month">This Month</TabsTrigger>
+                  <TabsTrigger value="all">All</TabsTrigger>
+                </TabsList>
+              </Tabs>
+              <div className="w-full sm:w-64 relative group">
+                <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400 group-focus-within:text-indigo-500 transition-colors duration-300" />
+                <Input 
+                  placeholder="Search date or name..." 
+                  value={search}
+                  onChange={(e) => setSearch(e.target.value)}
+                  className="h-10 pl-11 bg-white/60 dark:bg-slate-950/60 border-slate-200/60 dark:border-slate-800/60 focus-visible:ring-2 focus-visible:ring-indigo-500/50 rounded-xl shadow-sm hover:bg-white/80 dark:hover:bg-slate-900/80 transition-all duration-300"
+                />
+              </div>
             </div>
           </div>
         </CardHeader>

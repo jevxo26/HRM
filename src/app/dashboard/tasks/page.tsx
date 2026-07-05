@@ -5,6 +5,7 @@ import { ConfirmModal } from "@/components/ui/confirm-modal";
 import { Button } from "@/components/ui/button";
 import { Plus, MoreHorizontal, Edit, Trash2, Search, CheckCircle2, Eye, GripVertical } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Input } from "@/components/ui/input";
 import { TaskFormModal } from "./TaskFormModal";
 import { TaskDetailModal } from "./TaskDetailModal";
@@ -19,6 +20,14 @@ interface Task {
   userId?: number;
   priority: string;
   dueDate: string;
+  assignedTo?: {
+    name: string;
+    profile?: {
+      team?: {
+        name: string;
+      }
+    }
+  };
 }
 
 export default function TasksPage() {
@@ -161,6 +170,32 @@ export default function TasksPage() {
     { id: "completed", title: "Completed", bgColor: "bg-emerald-50 dark:bg-emerald-900/20", borderColor: "border-emerald-200 dark:border-emerald-800" }
   ];
 
+  const getGroups = () => {
+    const isLeader = ["cto", "ceo", "founder", "teamlead"].includes(userRole.toLowerCase());
+    const groups: Record<string, Task[]> = { "All": filteredTasks };
+    
+    filteredTasks.forEach(t => {
+      if (isLeader) {
+        const teamName = t.assignedTo?.profile?.team?.name || "Unassigned/No Team";
+        if (!groups[teamName]) groups[teamName] = [];
+        if (!groups[teamName].find(existing => existing.id === t.id)) {
+          groups[teamName].push(t);
+        }
+      } else {
+        const dateKey = t.dueDate ? new Date(t.dueDate).toLocaleDateString() : "No Due Date";
+        if (!groups[dateKey]) groups[dateKey] = [];
+        if (!groups[dateKey].find(existing => existing.id === t.id)) {
+          groups[dateKey].push(t);
+        }
+      }
+    });
+    
+    return groups;
+  };
+
+  const taskGroups = getGroups();
+  const [activeTab, setActiveTab] = useState("All");
+
   return (
     <div className="space-y-6 h-[calc(100vh-6rem)] flex flex-col">
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 shrink-0">
@@ -198,52 +233,71 @@ export default function TasksPage() {
         </div>
       </div>
 
-      <div className="flex gap-6 overflow-x-auto pb-4 flex-1 h-full min-h-0">
+      {!loading && Object.keys(taskGroups).length > 1 && (
+        <div className="overflow-x-auto pb-2 shrink-0">
+          <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
+            <TabsList className="inline-flex w-max min-w-full justify-start h-auto p-1 bg-white/40 dark:bg-slate-900/40 rounded-lg backdrop-blur-sm">
+              {Object.keys(taskGroups).map(groupName => (
+                <TabsTrigger 
+                  key={groupName} 
+                  value={groupName}
+                  className="px-4 py-2 rounded-md data-[state=active]:bg-white data-[state=active]:shadow-sm dark:data-[state=active]:bg-slate-800"
+                >
+                  {groupName} ({taskGroups[groupName].length})
+                </TabsTrigger>
+              ))}
+            </TabsList>
+          </Tabs>
+        </div>
+      )}
+
+      <div className="flex flex-col gap-6 overflow-y-auto pb-4 flex-1 h-full min-h-0">
         {loading ? (
-          <div className="flex w-full items-center justify-center">
+          <div className="flex w-full h-full items-center justify-center">
             <div className="flex flex-col items-center justify-center gap-3">
               <div className="relative flex h-8 w-8 items-center justify-center">
                 <div className="absolute inline-flex h-full w-full animate-ping rounded-full bg-indigo-400 opacity-75"></div>
                 <div className="relative inline-flex h-4 w-4 rounded-full bg-indigo-500"></div>
               </div>
-              <span className="text-sm font-medium text-slate-500 dark:text-slate-400 animate-pulse">Loading board...</span>
+              <span className="text-sm font-medium text-slate-500 dark:text-slate-400 animate-pulse">Loading tasks...</span>
             </div>
           </div>
-        ) : (
-          columns.map(col => {
-            const colTasks = filteredTasks.filter(t => t.status === col.id);
-            
-            return (
-              <div 
-                key={col.id}
-                className={`flex flex-col w-80 shrink-0 rounded-2xl border ${col.borderColor} ${col.bgColor} p-4`}
-                onDragOver={handleDragOver}
-                onDrop={(e) => handleDrop(e, col.id)}
-              >
-                <div className="flex items-center justify-between mb-4">
-                  <h3 className="font-semibold text-slate-700 dark:text-slate-300 capitalize">{col.title}</h3>
-                  <span className="bg-white dark:bg-slate-800 text-slate-500 text-xs px-2.5 py-1 rounded-full shadow-sm font-medium">
-                    {colTasks.length}
-                  </span>
-                </div>
-                
-                <div className="flex flex-col gap-4 overflow-y-auto min-h-[100px] h-full pb-2 pr-1">
-                  {colTasks.map(task => (
-                    <Card 
-                      key={task.id}
-                      draggable
-                      onDragStart={(e) => handleDragStart(e, task.id)}
-                      className="border-0 shadow-sm hover:shadow-md transition-all duration-200 cursor-grab active:cursor-grabbing bg-white/90 dark:bg-slate-900/90 backdrop-blur group"
-                    >
-                      <CardContent className="p-4 flex flex-col gap-3">
-                        <div className="flex items-start justify-between gap-2">
-                          <div className="flex gap-2">
-                            <GripVertical className="h-4 w-4 text-slate-400 mt-0.5 shrink-0" />
-                            <h4 className="font-medium text-sm leading-tight text-slate-800 dark:text-slate-200 line-clamp-2">
-                              {task.title}
-                            </h4>
-                          </div>
-                          {userRole !== "employee" && (
+        ) : ["cto", "ceo", "founder", "teamlead"].includes(userRole.toLowerCase()) ? (
+          <div className="flex gap-6 overflow-x-auto h-full w-full">
+            {columns.map(col => {
+              const currentGroupTasks = taskGroups[activeTab] || [];
+              const colTasks = currentGroupTasks.filter(t => t.status === col.id);
+              
+              return (
+                <div 
+                  key={col.id}
+                  className={`flex flex-col w-80 shrink-0 rounded-2xl border ${col.borderColor} ${col.bgColor} p-4`}
+                  onDragOver={handleDragOver}
+                  onDrop={(e) => handleDrop(e, col.id)}
+                >
+                  <div className="flex items-center justify-between mb-4">
+                    <h3 className="font-semibold text-slate-700 dark:text-slate-300 capitalize">{col.title}</h3>
+                    <span className="bg-white dark:bg-slate-800 text-slate-500 text-xs px-2.5 py-1 rounded-full shadow-sm font-medium">
+                      {colTasks.length}
+                    </span>
+                  </div>
+                  
+                  <div className="flex flex-col gap-4 overflow-y-auto min-h-[100px] h-full pb-2 pr-1">
+                    {colTasks.map(task => (
+                      <Card 
+                        key={task.id}
+                        draggable
+                        onDragStart={(e) => handleDragStart(e, task.id)}
+                        className="border-0 shadow-sm hover:shadow-md transition-all duration-200 cursor-grab active:cursor-grabbing bg-white/90 dark:bg-slate-900/90 backdrop-blur group"
+                      >
+                        <CardContent className="p-4 flex flex-col gap-3">
+                          <div className="flex items-start justify-between gap-2">
+                            <div className="flex gap-2">
+                              <GripVertical className="h-4 w-4 text-slate-400 mt-0.5 shrink-0" />
+                              <h4 className="font-medium text-sm leading-tight text-slate-800 dark:text-slate-200 line-clamp-2">
+                                {task.title}
+                              </h4>
+                            </div>
                             <div className="flex gap-1 shrink-0 opacity-0 group-hover:opacity-100 hover:opacity-100 transition-opacity">
                               <button 
                                 onClick={(e) => { e.stopPropagation(); setEditingTask(task); setIsModalOpen(true); }}
@@ -258,15 +312,84 @@ export default function TasksPage() {
                                 <Trash2 className="h-3.5 w-3.5" />
                               </button>
                             </div>
-                          )}
+                          </div>
+                          
+                          <p className="text-xs text-slate-500 dark:text-slate-400 line-clamp-2">
+                            {task.description || "No description provided."}
+                          </p>
+                          
+                          <div className="flex items-center justify-between mt-1">
+                            <span className={`inline-flex items-center px-2 py-0.5 rounded text-[10px] font-medium capitalize border ${
+                              task.priority === 'high' ? 'bg-rose-50 text-rose-700 border-rose-200' :
+                              task.priority === 'medium' ? 'bg-amber-50 text-amber-700 border-amber-200' :
+                              'bg-emerald-50 text-emerald-700 border-emerald-200'
+                            }`}>
+                              {task.priority || 'Medium'}
+                            </span>
+                            
+                            <div className="flex items-center gap-1">
+                              <button 
+                                onClick={(e) => { e.stopPropagation(); setViewingTask(task); setIsDetailModalOpen(true); }}
+                                className="text-slate-400 hover:text-indigo-600 bg-slate-50 hover:bg-indigo-50 dark:bg-slate-800 dark:hover:bg-indigo-900/30 p-1.5 rounded-lg transition-colors"
+                                title="View Details"
+                              >
+                                <Eye className="h-3.5 w-3.5" />
+                              </button>
+                            </div>
+                          </div>
+                        </CardContent>
+                      </Card>
+                    ))}
+                    
+                    {colTasks.length === 0 && (
+                      <div className="flex flex-col items-center justify-center h-24 border-2 border-dashed border-slate-200 dark:border-slate-700 rounded-xl text-slate-400 dark:text-slate-500">
+                        <span className="text-sm">Drop here</span>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        ) : (
+          <div className="flex flex-col gap-8 w-full pr-2 pb-4 overflow-y-auto">
+            {Object.keys(taskGroups).filter(k => k !== "All").map(dateGroup => (
+              <div key={dateGroup} className="flex flex-col gap-4">
+                <div className="flex items-center gap-2 border-b border-slate-200 dark:border-slate-800 pb-2">
+                  <div className="w-2 h-2 rounded-full bg-indigo-500"></div>
+                  <h3 className="text-lg font-semibold text-slate-800 dark:text-slate-200">{dateGroup}</h3>
+                  <span className="bg-slate-100 dark:bg-slate-800 text-slate-500 text-xs px-2 py-0.5 rounded-full font-medium ml-2">
+                    {taskGroups[dateGroup].length} tasks
+                  </span>
+                </div>
+                
+                <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
+                  {taskGroups[dateGroup].map(task => (
+                    <Card 
+                      key={task.id}
+                      className="border border-slate-200 dark:border-slate-800 shadow-sm hover:shadow-md transition-all duration-200 bg-white dark:bg-slate-900"
+                    >
+                      <CardContent className="p-5 flex flex-col gap-3">
+                        <div className="flex items-start justify-between gap-2">
+                          <h4 className="font-semibold text-base leading-tight text-slate-800 dark:text-slate-200 line-clamp-2">
+                            {task.title}
+                          </h4>
+                          <span className={`px-2.5 py-1 rounded-full text-xs font-semibold capitalize whitespace-nowrap ${
+                            task.status === 'completed' ? 'bg-emerald-100 text-emerald-700' :
+                            task.status === 'in_progress' ? 'bg-indigo-100 text-indigo-700' :
+                            task.status === 'in_review' ? 'bg-amber-100 text-amber-700' :
+                            'bg-slate-100 text-slate-700'
+                          }`}>
+                            {task.status.replace('_', ' ')}
+                          </span>
                         </div>
                         
-                        <p className="text-xs text-slate-500 dark:text-slate-400 line-clamp-2">
+                        <p className="text-sm text-slate-500 dark:text-slate-400 line-clamp-3">
                           {task.description || "No description provided."}
                         </p>
                         
-                        <div className="flex items-center justify-between mt-1">
-                          <span className={`inline-flex items-center px-2 py-0.5 rounded text-[10px] font-medium capitalize border ${
+                        <div className="flex items-center justify-between mt-2 pt-3 border-t border-slate-100 dark:border-slate-800">
+                          <span className={`inline-flex items-center px-2.5 py-0.5 rounded-md text-xs font-medium capitalize border ${
                             task.priority === 'high' ? 'bg-rose-50 text-rose-700 border-rose-200' :
                             task.priority === 'medium' ? 'bg-amber-50 text-amber-700 border-amber-200' :
                             'bg-emerald-50 text-emerald-700 border-emerald-200'
@@ -274,29 +397,26 @@ export default function TasksPage() {
                             {task.priority || 'Medium'}
                           </span>
                           
-                          <div className="flex items-center gap-1">
-                            <button 
-                              onClick={(e) => { e.stopPropagation(); setViewingTask(task); setIsDetailModalOpen(true); }}
-                              className="text-slate-400 hover:text-indigo-600 bg-slate-50 hover:bg-indigo-50 dark:bg-slate-800 dark:hover:bg-indigo-900/30 p-1.5 rounded-lg transition-colors"
-                              title="View Details"
-                            >
-                              <Eye className="h-3.5 w-3.5" />
-                            </button>
-                          </div>
+                          <button 
+                            onClick={() => { setViewingTask(task); setIsDetailModalOpen(true); }}
+                            className="flex items-center gap-1.5 text-xs font-medium text-indigo-600 hover:text-indigo-700 bg-indigo-50 hover:bg-indigo-100 px-3 py-1.5 rounded-lg transition-colors"
+                          >
+                            <Eye className="h-3.5 w-3.5" />
+                            View
+                          </button>
                         </div>
                       </CardContent>
                     </Card>
                   ))}
-                  
-                  {colTasks.length === 0 && (
-                    <div className="flex flex-col items-center justify-center h-24 border-2 border-dashed border-slate-200 dark:border-slate-700 rounded-xl text-slate-400 dark:text-slate-500">
-                      <span className="text-sm">Drop here</span>
-                    </div>
-                  )}
                 </div>
               </div>
-            );
-          })
+            ))}
+            {Object.keys(taskGroups).filter(k => k !== "All").length === 0 && (
+              <div className="flex flex-col items-center justify-center py-12 text-slate-400">
+                <span className="text-lg">No tasks assigned to you.</span>
+              </div>
+            )}
+          </div>
         )}
       </div>
       

@@ -87,7 +87,11 @@ export function TaskFormModal({ open, onOpenChange, task, onSuccess }: TaskFormM
         description: task.description || "",
         status: task.status || "pending",
         priority: task.priority || "medium",
-        dueDate: task.dueDate ? new Date(task.dueDate).toISOString().slice(0, 16) : "",
+        dueDate: task.dueDate ? (() => {
+          const d = new Date(task.dueDate);
+          const pad = (n: number) => n.toString().padStart(2, '0');
+          return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`;
+        })() : "",
         projectId: task.projectId?.toString() || "",
         userId: task.userId?.toString() || "",
       });

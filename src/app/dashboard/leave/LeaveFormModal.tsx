@@ -66,8 +66,16 @@ export function LeaveFormModal({ open, onOpenChange, leave, onSuccess }: LeaveFo
     if (leave) {
       setFormData({
         leaveTypeId: leave.leaveTypeId?.toString() || "",
-        startDate: leave.startDate ? new Date(leave.startDate).toISOString().split('T')[0] : "",
-        endDate: leave.endDate ? new Date(leave.endDate).toISOString().split('T')[0] : "",
+        startDate: leave.startDate ? (() => {
+          const d = new Date(leave.startDate);
+          const pad = (n: number) => n.toString().padStart(2, '0');
+          return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
+        })() : "",
+        endDate: leave.endDate ? (() => {
+          const d = new Date(leave.endDate);
+          const pad = (n: number) => n.toString().padStart(2, '0');
+          return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
+        })() : "",
         dayType: leave.dayType || "full_day",
         reason: leave.reason || "",
         status: leave.status || "pending",
