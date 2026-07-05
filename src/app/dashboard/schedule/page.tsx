@@ -4,7 +4,7 @@ import React, { useEffect, useState } from "react";
 import { ConfirmModal } from "@/components/ui/confirm-modal";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
-import { Plus, MoreHorizontal, Edit, Trash2, Search, Calendar } from "lucide-react";
+import { Plus, MoreHorizontal, Edit, Trash2, Search, Calendar, Coffee, Zap, Sun, Cloud, Star, CloudRain, Moon, User } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { ScheduleFormModal } from "./ScheduleFormModal";
@@ -91,127 +91,151 @@ export default function SchedulePage() {
     (s.dayOfWeek || "").toLowerCase().includes(search.toLowerCase())
   );
 
+  const groupedSchedules = React.useMemo(() => {
+    const grouped: Record<number, { name: string, schedules: Record<string, Schedule> }> = {};
+    
+    filteredSchedules.forEach(schedule => {
+      if (!grouped[schedule.userId]) {
+        grouped[schedule.userId] = {
+          name: schedule.user?.name || `User ID: ${schedule.userId}`,
+          schedules: {}
+        };
+      }
+      grouped[schedule.userId].schedules[schedule.dayOfWeek] = schedule;
+    });
+    
+    return Object.values(grouped);
+  }, [filteredSchedules]);
+
+  const daysOfWeek = [
+    { name: "Monday", icon: Coffee },
+    { name: "Tuesday", icon: Zap },
+    { name: "Wednesday", icon: Sun },
+    { name: "Thursday", icon: Cloud },
+    { name: "Friday", icon: Star },
+    { name: "Saturday", icon: CloudRain },
+    { name: "Sunday", icon: Moon }
+  ];
+
   return (
     <div className="space-y-6">
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <h1 className="text-3xl font-bold tracking-tight">Schedule</h1>
-        <Button 
-          className="bg-indigo-600 hover:bg-indigo-700 text-white"
-          onClick={() => {
-            setEditingSchedule(null);
-            setIsModalOpen(true);
-          }}
-        >
-          <Plus className="mr-2 h-4 w-4" /> Add Event
-        </Button>
+        {userRole !== "employee" && (
+          <Button 
+            className="bg-indigo-600 hover:bg-indigo-700 text-white"
+            onClick={() => {
+              setEditingSchedule(null);
+              setIsModalOpen(true);
+            }}
+          >
+            <Plus className="mr-2 h-4 w-4" /> Add Event
+          </Button>
+        )}
       </div>
 
-      <Card className="border-0 shadow-2xl bg-white/40 dark:bg-slate-900/40 backdrop-blur-2xl ring-1 ring-white/60 dark:ring-slate-800/60 overflow-hidden rounded-[2rem]">
-        <CardHeader className="px-8 pb-6 pt-8 border-b border-slate-200/40 dark:border-slate-800/60 bg-white/20 dark:bg-slate-900/20">
+      <Card className="border-0 shadow-2xl bg-[#0F0F12] overflow-hidden rounded-[2rem] border border-white/5">
+        <CardHeader className="px-8 pb-6 pt-8 border-b border-white/5 bg-[#0F0F12]">
           <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-            <CardTitle className="text-2xl font-bold bg-gradient-to-r from-indigo-600 via-purple-600 to-indigo-600 bg-clip-text text-transparent flex items-center gap-3 animate-gradient-x">
-              <div className="p-2.5 bg-indigo-100 dark:bg-indigo-500/20 rounded-xl">
-                <Calendar className="h-6 w-6 text-indigo-600 dark:text-indigo-400" />
-              </div>
-              Upcoming Events
-            </CardTitle>
+            <div>
+              <CardTitle className="text-2xl font-bold text-white flex items-center gap-3">
+                <div className="p-2.5 bg-indigo-500/20 rounded-xl">
+                  <Calendar className="h-6 w-6 text-indigo-400" />
+                </div>
+                Weekly Schedule
+              </CardTitle>
+              <p className="text-slate-400 mt-2 text-sm ml-14">Manage weekly employee shifts and meetings</p>
+            </div>
             <div className="w-full sm:w-80 relative group">
               <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400 group-focus-within:text-indigo-500 transition-colors duration-300" />
               <Input 
-                placeholder="Search by name or day..." 
+                placeholder="Search employee..." 
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
-                className="h-11 pl-11 bg-white/60 dark:bg-slate-950/60 border-slate-200/60 dark:border-slate-800/60 focus-visible:ring-2 focus-visible:ring-indigo-500/50 rounded-2xl shadow-sm hover:bg-white/80 dark:hover:bg-slate-900/80 transition-all duration-300"
+                className="h-11 pl-11 bg-white/5 border-white/10 text-white focus-visible:ring-2 focus-visible:ring-indigo-500/50 rounded-2xl shadow-sm hover:bg-white/10 transition-all duration-300 placeholder:text-slate-500"
               />
             </div>
           </div>
         </CardHeader>
-        <CardContent className="p-0">
-          <div className="w-full overflow-x-auto">
-            <Table className="w-full">
-              <TableHeader className="bg-slate-50/50 dark:bg-slate-800/30 border-b border-slate-200/50 dark:border-slate-800/60 backdrop-blur-md">
-                <TableRow className="hover:bg-transparent border-none">
-                  <TableHead className="font-semibold text-slate-700 dark:text-slate-300 py-5 px-8 uppercase tracking-wider text-xs">User</TableHead>
-                  <TableHead className="font-semibold text-slate-700 dark:text-slate-300 py-5 px-6 uppercase tracking-wider text-xs">Day</TableHead>
-                  <TableHead className="font-semibold text-slate-700 dark:text-slate-300 py-5 px-6 uppercase tracking-wider text-xs">Start Time</TableHead>
-                  <TableHead className="font-semibold text-slate-700 dark:text-slate-300 py-5 px-6 uppercase tracking-wider text-xs">End Time</TableHead>
-                  <TableHead className="text-right font-semibold text-slate-700 dark:text-slate-300 py-5 px-8 uppercase tracking-wider text-xs">Actions</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {loading ? (
-                  <TableRow>
-                    <TableCell colSpan={5} className="text-center h-48">
-                      <div className="flex flex-col items-center justify-center gap-3">
-                        <div className="relative flex h-8 w-8 items-center justify-center">
-                          <div className="absolute inline-flex h-full w-full animate-ping rounded-full bg-indigo-400 opacity-75"></div>
-                          <div className="relative inline-flex h-4 w-4 rounded-full bg-indigo-500"></div>
+        <CardContent className="p-0 bg-[#0F0F12]">
+          <div className="w-full overflow-x-auto p-6">
+            <div className="min-w-[1000px] border border-white/10 rounded-2xl overflow-hidden bg-[#16161A] pb-1">
+              <div className="grid grid-cols-8 border-b border-white/10 text-slate-400">
+                <div className="px-6 py-4 flex items-center gap-2 border-r border-white/10">
+                  <User className="h-4 w-4 text-indigo-400" />
+                  <span className="font-semibold text-white text-sm">Employee</span>
+                </div>
+                {daysOfWeek.map((day) => {
+                  const Icon = day.icon;
+                  return (
+                    <div key={day.name} className="px-4 py-4 flex flex-col items-center justify-center gap-1 border-r border-white/10 last:border-r-0">
+                      <Icon className="h-4 w-4 text-indigo-400" />
+                      <span className="text-xs font-medium text-white">{day.name.substring(0, 3)}</span>
+                    </div>
+                  );
+                })}
+              </div>
+              
+              {/* Progress Bar styled element directly under header */}
+              <div className="w-full px-2">
+                <div className="h-1 w-full bg-gradient-to-r from-indigo-600 via-purple-500 to-indigo-400 rounded-full my-1 shadow-[0_0_10px_rgba(99,102,241,0.3)]"></div>
+              </div>
+
+              {loading ? (
+                <div className="flex justify-center items-center h-48">
+                  <div className="flex flex-col items-center justify-center gap-3">
+                    <div className="relative flex h-8 w-8 items-center justify-center">
+                      <div className="absolute inline-flex h-full w-full animate-ping rounded-full bg-indigo-400 opacity-75"></div>
+                      <div className="relative inline-flex h-4 w-4 rounded-full bg-indigo-500"></div>
+                    </div>
+                  </div>
+                </div>
+              ) : groupedSchedules.length === 0 ? (
+                <div className="flex flex-col items-center justify-center gap-2 h-48">
+                  <Calendar className="h-10 w-10 text-slate-600 mb-2" />
+                  <span className="text-base font-medium text-slate-400">No scheduled events found</span>
+                </div>
+              ) : (
+                <div className="divide-y divide-white/5">
+                  {groupedSchedules.map((userGroup, index) => (
+                    <div key={index} className="grid grid-cols-8 hover:bg-white/5 transition-colors duration-200">
+                      <div className="px-6 py-4 flex items-center gap-3 border-r border-white/5">
+                        <div className="h-8 w-8 rounded-full bg-indigo-500/20 flex items-center justify-center text-indigo-400 font-bold text-xs">
+                          {userGroup.name.substring(0, 2).toUpperCase()}
                         </div>
-                        <span className="text-sm font-medium text-slate-500 dark:text-slate-400 animate-pulse">Loading schedule...</span>
+                        <span className="font-semibold text-slate-200 text-sm truncate">{userGroup.name}</span>
                       </div>
-                    </TableCell>
-                  </TableRow>
-                ) : filteredSchedules.length === 0 ? (
-                  <TableRow>
-                    <TableCell colSpan={5} className="text-center h-48">
-                      <div className="flex flex-col items-center justify-center gap-2">
-                        <Calendar className="h-10 w-10 text-slate-300 dark:text-slate-700 mb-2" />
-                        <span className="text-base font-medium text-slate-600 dark:text-slate-400">No scheduled events found</span>
-                        <span className="text-sm text-slate-400 dark:text-slate-500">Try adjusting your search criteria</span>
-                      </div>
-                    </TableCell>
-                  </TableRow>
-                ) : (
-                  filteredSchedules.map((schedule, index) => (
-                    <TableRow 
-                      key={schedule.id}
-                      className={`group border-b border-slate-100/50 dark:border-slate-800/40 transition-all duration-300 hover:bg-white/80 dark:hover:bg-slate-800/50 hover:shadow-[0_4px_20px_-4px_rgba(0,0,0,0.05)] dark:hover:shadow-[0_4px_20px_-4px_rgba(0,0,0,0.2)] ${index % 2 === 0 ? 'bg-transparent' : 'bg-slate-50/20 dark:bg-slate-900/20'}`}
-                    >
-                      <TableCell className="px-8 py-5">
-                        <div className="flex items-center gap-3">
-                          <div className="h-10 w-10 rounded-full bg-gradient-to-br from-indigo-100 to-purple-100 dark:from-indigo-900/50 dark:to-purple-900/50 flex items-center justify-center text-indigo-700 dark:text-indigo-300 font-bold text-sm shadow-inner">
-                            {(schedule.user?.name || `U${schedule.userId}`).substring(0, 2).toUpperCase()}
-                          </div>
-                          <div>
-                            <span className="font-semibold text-slate-900 dark:text-slate-100 text-base">{schedule.user?.name || `User ID: ${schedule.userId}`}</span>
-                          </div>
-                        </div>
-                      </TableCell>
-                      <TableCell className="px-6 py-5">
-                        <span className="inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-semibold bg-indigo-50 text-indigo-700 dark:bg-indigo-500/10 dark:text-indigo-300 border border-indigo-100 dark:border-indigo-500/20 shadow-sm capitalize">
-                          {schedule.dayOfWeek}
-                        </span>
-                      </TableCell>
-                      <TableCell className="px-6 py-5 text-slate-600 dark:text-slate-300">{schedule.startTime}</TableCell>
-                      <TableCell className="px-6 py-5 text-slate-600 dark:text-slate-300">{schedule.endTime}</TableCell>
-                      <TableCell className="text-right px-8 py-5">
-                        <div className="flex items-center justify-end gap-2 opacity-0 group-hover:opacity-100 transition-all duration-300 translate-x-2 group-hover:translate-x-0">
-                          <Button 
-                            variant="ghost" 
-                            size="icon"
-                            className="h-9 w-9 text-slate-400 hover:text-indigo-600 hover:bg-indigo-50 dark:hover:bg-indigo-500/20 rounded-xl transition-all shadow-sm hover:shadow"
+                      
+                      {daysOfWeek.map((day) => {
+                        const scheduleForDay = userGroup.schedules[day.name];
+                        return (
+                          <div 
+                            key={day.name} 
+                            className={`px-3 py-4 flex items-center justify-center border-r border-white/5 last:border-r-0 ${scheduleForDay ? 'cursor-pointer hover:bg-white/10' : ''}`}
                             onClick={() => {
-                              setEditingSchedule(schedule);
-                              setIsModalOpen(true);
+                              if (scheduleForDay && userRole !== "employee") {
+                                setEditingSchedule(scheduleForDay);
+                                setIsModalOpen(true);
+                              }
                             }}
                           >
-                            <Edit className="h-4 w-4" />
-                          </Button>
-                          <Button 
-                            variant="ghost" 
-                            size="icon"
-                            className="h-9 w-9 text-slate-400 hover:text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-500/20 rounded-xl transition-all shadow-sm hover:shadow"
-                            onClick={() => setDeleteId(schedule.id)}
-                          >
-                            <Trash2 className="h-4 w-4" />
-                          </Button>
-                        </div>
-                      </TableCell>
-                    </TableRow>
-                  ))
-                )}
-              </TableBody>
-            </Table>
+                            {scheduleForDay ? (
+                              <div className="flex flex-col items-center text-center">
+                                <span className="text-xs font-semibold text-emerald-400">{scheduleForDay.startTime}</span>
+                                <span className="text-[10px] text-slate-500">-</span>
+                                <span className="text-xs font-semibold text-rose-400">{scheduleForDay.endTime}</span>
+                              </div>
+                            ) : (
+                              <span className="text-slate-700 text-xl font-light">-</span>
+                            )}
+                          </div>
+                        );
+                      })}
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
           </div>
         </CardContent>
       </Card>
