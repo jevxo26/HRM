@@ -112,7 +112,7 @@ export default function ProjectDetailsPage() {
   if (!project) return <div className="p-8">Project not found</div>;
 
   return (
-    <div className="p-8 w-full max-w-[100vw] mx-auto space-y-6">
+    <div className="p-4 md:p-8 w-full max-w-[100vw] mx-auto space-y-4 md:space-y-6 overflow-x-hidden">
       <div className="flex items-center space-x-4 mb-6">
         <Button variant="outline" size="icon" onClick={() => router.back()}>
           <ArrowLeft className="h-4 w-4" />

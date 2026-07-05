@@ -141,7 +141,7 @@ export function LeaveFormModal({ open, onOpenChange, leave, onSuccess }: LeaveFo
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-[90vw] w-full">
+      <DialogContent className="sm:max-w-[500px] w-full">
         <form onSubmit={handleSubmit}>
           <DialogHeader>
             <DialogTitle>{leave ? "Update Leave Status" : "Apply for Leave"}</DialogTitle>

@@ -77,7 +77,7 @@ export function LeaveTypeFormModal({ open, onOpenChange, leaveType, onSuccess }:
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-[90vw] w-full rounded-[2rem] border-0 shadow-2xl bg-white/95 dark:bg-slate-950/95 backdrop-blur-2xl">
+      <DialogContent className="sm:max-w-[500px] w-full rounded-[2rem] border-0 shadow-2xl bg-white/95 dark:bg-slate-950/95 backdrop-blur-2xl">
         <DialogHeader>
           <DialogTitle className="text-2xl font-bold bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent">
             {leaveType ? "Edit Leave Type" : "Create Leave Type"}

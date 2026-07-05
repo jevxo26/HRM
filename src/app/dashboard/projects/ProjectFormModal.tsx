@@ -100,7 +100,7 @@ export function ProjectFormModal({ open, onOpenChange, project, onSuccess }: Pro
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-[90vw] w-full">
+      <DialogContent className="sm:max-w-[500px] w-full">
         <form onSubmit={handleSubmit}>
           <DialogHeader>
             <DialogTitle>{project ? "Edit Project" : "Add Project"}</DialogTitle>

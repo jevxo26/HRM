@@ -139,7 +139,7 @@ export function AttendanceFormModal({ open, onOpenChange, record, onSuccess, use
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-[90vw] w-full">
+      <DialogContent className="sm:max-w-[500px] w-full">
         <form onSubmit={handleSubmit}>
           <DialogHeader>
             <DialogTitle>{record ? "Edit Attendance" : "Add Attendance"}</DialogTitle>
